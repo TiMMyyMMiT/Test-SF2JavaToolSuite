@@ -7,7 +7,6 @@ package com.sfc.sf2.helpers;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
@@ -19,7 +18,7 @@ import java.awt.image.DataBufferInt;
  * @author TiMMy
  */
 public class GraphicsHelpers {
-        
+    
     public static void drawFlatBackgroundColor(BufferedImage image, Color bgColor) {
         int bgInt = bgColor.getRGB();
         int[] data = ((DataBufferInt)(image.getRaster().getDataBuffer())).getData();
@@ -51,14 +50,14 @@ public class GraphicsHelpers {
         graphics.setStroke(new BasicStroke(gridThickness));
         int x = 0;
         int y = 0;
-        if (gridW >= 0) {
+        if (gridW > 0) {
             while (x < image.getWidth()) {
                 graphics.drawLine(x, 0, x, image.getHeight());
                 x += gridW;
             }
             graphics.drawLine(x-1, 0, x-1, image.getHeight());
         }
-        if (gridH >= 0) {
+        if (gridH > 0) {
             while (y < image.getHeight()) {
                 graphics.drawLine(0, y, image.getWidth(), y);
                 y += gridH;

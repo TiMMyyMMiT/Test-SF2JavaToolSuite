@@ -5,6 +5,7 @@
  */
 package com.sfc.sf2.core.gui.layout;
 
+import com.sfc.sf2.core.actions.ActionManager;
 import com.sfc.sf2.core.gui.AbstractLayoutPanel;
 import com.sfc.sf2.core.gui.controls.Console;
 import java.awt.Dimension;
@@ -29,7 +30,7 @@ public abstract class BaseMouseCoordsComponent extends BaseLayoutComponent imple
     
     private Dimension bounds = NO_OFFSET;
     private Dimension coordsOffset = NO_OFFSET;
-    private int displayScale = 1;
+    private float displayScale = 1;
     
     private int lastX = -1;
     private int lastY = -1;
@@ -64,7 +65,7 @@ public abstract class BaseMouseCoordsComponent extends BaseLayoutComponent imple
         this.motionListener = motionListener;
     }
     
-    public void updateDisplayParameters(int displayScale, Dimension bounds, Dimension coordsOffset) {
+    public void updateDisplayParameters(float displayScale, Dimension bounds, Dimension coordsOffset) {
         this.bounds = bounds;
         this.displayScale = displayScale;
         this.coordsOffset = coordsOffset;
@@ -117,7 +118,7 @@ public abstract class BaseMouseCoordsComponent extends BaseLayoutComponent imple
         lastX = x;
         lastY = y;
         buttonHeld = e.getButton();
-        buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, false, false));
+        buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, false, true, false));
     }
     
     @Override
@@ -132,7 +133,7 @@ public abstract class BaseMouseCoordsComponent extends BaseLayoutComponent imple
         lastX = x;
         lastY = y;
         if (buttonListener != null) {
-            buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, true, false));
+            buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, true, true, false));
         }
         if (motionListener != null) {
             motionListener.mouseMoved(new GridMouseMoveEvent(x, y, true));
@@ -146,12 +147,14 @@ public abstract class BaseMouseCoordsComponent extends BaseLayoutComponent imple
         int y = getYCoord(e.getY());
         if (x == -1 || y == -1) return;
         if (buttonListener != null) {
-            buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, false, true));
+            buttonListener.mousePressed(new GridMousePressedEvent(x, y, buttonHeld, false, false, true));
         }
         buttonHeld = -1;
+        //When mouse is released then stop any action from combining
+        ActionManager.preventActionsCombining();
     }
     
-    public record GridMousePressedEvent(int x, int y, int mouseButton, boolean dragging, boolean released) { }
+    public record GridMousePressedEvent(int x, int y, int mouseButton, boolean dragging, boolean pressed, boolean released) { }
     public interface GridMousePressedListener extends EventListener {
         public void mousePressed(GridMousePressedEvent evt);
     }

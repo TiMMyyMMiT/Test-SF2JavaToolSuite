@@ -6,6 +6,7 @@
 package com.sfc.sf2.battle;
 
 import java.awt.Point;
+import java.util.Arrays;
 
 /**
  *
@@ -86,5 +87,17 @@ public class BattleSpriteset {
             aiPoints[i].setX(aiPoints[i].getX()+xShift);
             aiPoints[i].setY(aiPoints[i].getY()+yShift);
         }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BattleSpriteset)) return super.equals(obj);
+        BattleSpriteset other = (BattleSpriteset)obj;
+        if (this.index != other.index) return false;
+        if (!Arrays.equals(this.allies, other.allies)) return false;
+        if (!Arrays.equals(this.enemies, other.enemies)) return false;
+        if (!Arrays.equals(this.aiRegions, other.aiRegions)) return false;
+        if (!Arrays.equals(this.aiPoints, other.aiPoints)) return false;
+        return true;
     }
 }

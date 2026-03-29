@@ -7,7 +7,6 @@ package com.sfc.sf2.vwfont.settings;
 
 import com.sfc.sf2.core.io.FileFormat;
 import com.sfc.sf2.core.settings.AbstractSettings;
-import java.awt.Color;
 import java.util.HashMap;
 
 /**
@@ -16,16 +15,7 @@ import java.util.HashMap;
  */
 public class FontSettings implements AbstractSettings {
     
-    private Color transparentBGColor;
     private FileFormat exportFileFormat;
-    
-    public void setTransparentBGColor(Color transparentBGColor) {
-        this.transparentBGColor = transparentBGColor;
-    }
-    
-    public Color getTransparentBGColor() {
-        return transparentBGColor;
-    }
     
     public FileFormat getExportFileFormat() {
         return exportFileFormat;
@@ -37,7 +27,6 @@ public class FontSettings implements AbstractSettings {
 
     @Override
     public void initialiseNewUser() {
-        transparentBGColor = new Color(200, 200, 255);
         exportFileFormat = exportFileFormat.PNG;
     }
     
@@ -47,18 +36,11 @@ public class FontSettings implements AbstractSettings {
             if (data.containsKey("exportFileFormat")) {
                 exportFileFormat = FileFormat.valueOf(data.get("exportFileFormat"));
             }
-        } catch (Exception e) {
-            initialiseNewUser();
-        }
-        if (data.containsKey("transparentBGColor")) {
-            String[] colorSplit = data.get("transparentBGColor").split(",");
-            transparentBGColor = new Color(Integer.parseInt(colorSplit[0].trim()), Integer.parseInt(colorSplit[1].trim()), Integer.parseInt(colorSplit[2].trim()));
-        }
+        } catch (Exception e) { }
     }
 
     @Override
     public void encodeSettings(HashMap<String, String> data) {
-        data.put("transparentBGColor", String.format("%d, %d, %d", transparentBGColor.getRed(), transparentBGColor.getGreen(), transparentBGColor.getBlue()));
         data.put("exportFileFormat", exportFileFormat.toString());
     }
 }

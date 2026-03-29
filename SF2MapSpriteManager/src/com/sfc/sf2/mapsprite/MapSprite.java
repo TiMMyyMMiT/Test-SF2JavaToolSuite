@@ -12,6 +12,7 @@ import static com.sfc.sf2.graphics.Tile.PIXEL_WIDTH;
 import com.sfc.sf2.palette.Palette;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 /**
  *
@@ -43,6 +44,15 @@ public class MapSprite {
 
     public int getFacingIndex() {
         return facingIndex;
+    }
+    
+    public int getCombinedIndex() {
+        return index*3 + facingIndex;
+    }
+    
+    public void setCombinedIndex(int index) {
+        this.index = index/3;
+        this.facingIndex = index%3;
     }
     
     public Block[] getFrames() {
@@ -139,14 +149,9 @@ public class MapSprite {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return this == null;
-        if (obj == this) return true;
-        if (!(obj instanceof MapSprite)) return false;
+        if (!(obj instanceof MapSprite)) return super.equals(obj);
         MapSprite sprite = (MapSprite)obj;
-        for (int i = 0; i < frames.length; i++) {
-            if ((frames[i] == null) != (sprite.frames[i] == null)) return false;
-            if (frames[i] != null && !frames[i].equals(sprite.frames[i])) return false;
-        }
+        if (!Arrays.equals(this.frames, sprite.frames)) return false;
         return true;
     }
 }

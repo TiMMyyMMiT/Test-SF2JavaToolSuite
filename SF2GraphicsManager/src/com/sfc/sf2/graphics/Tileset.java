@@ -5,18 +5,20 @@
  */
 package com.sfc.sf2.graphics;
 
+import com.sfc.sf2.core.INameable;
 import static com.sfc.sf2.graphics.Tile.PIXEL_HEIGHT;
 import static com.sfc.sf2.graphics.Tile.PIXEL_WIDTH;
 import com.sfc.sf2.palette.Palette;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 /**
  *
  * @author TiMMy
  */
-public class Tileset {
+public class Tileset implements INameable {
     
     private String name;
     protected Tile[] tiles;
@@ -30,6 +32,7 @@ public class Tileset {
         this.tilesPerRow = tilesPerRow;
     }
     
+    @Override
     public String getName() {
         return name;
     }
@@ -84,7 +87,7 @@ public class Tileset {
         for (int i = 0; i < tiles.length; i++) {
             tiles[i].setPalette(palette);
         }
-        clearIndexedColorImage(false);
+        clearIndexedColorImage(true);
     }
     
     public BufferedImage getIndexedColorImage() {
@@ -132,16 +135,9 @@ public class Tileset {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return this == null;
-        if (obj == this) return true;
-        if (!(obj instanceof Tileset)) return false;
+        if (!(obj instanceof Tileset)) return super.equals(obj);
         Tileset tileset = (Tileset)obj;
-        for (int i=0; i < this.tiles.length; i++) {
-            if (!this.tiles[i].equals(tileset.getTiles()[i])) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.equals(this.tiles, tileset.tiles);
     }
     
     public Tileset clone() {

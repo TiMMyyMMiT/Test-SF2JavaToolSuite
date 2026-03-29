@@ -5,6 +5,9 @@
  */
 package com.sfc.sf2.core.gui.controls;
 
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.TableAction;
+import com.sfc.sf2.core.actions.TableActionData;
 import com.sfc.sf2.core.models.AbstractTableModel;
 import com.sfc.sf2.core.models.SelectionInterval;
 import com.sfc.sf2.core.models.spinner.SpinnerTableEditor;
@@ -14,6 +17,7 @@ import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumnModel;
@@ -33,6 +37,9 @@ public class Table extends javax.swing.JPanel {
         super();
         initComponents();
         tableModel = getModel();
+        if (tableModel != null) {
+            tableModel.setLinkedTable(this);
+        }
         jPanelInfo.setVisible(infoButton.getMessageText() != null && infoButton.getMessageText().length() > 0);
     }
     
@@ -75,6 +82,9 @@ public class Table extends javax.swing.JPanel {
     public void setModel(AbstractTableModel model) {
         tableModel = model;
         jTable.setModel(model);
+        if (tableModel != null) {
+            tableModel.setLinkedTable(this);
+        }
     }
     
     @BeanProperty(enumerationValues = {
@@ -94,7 +104,9 @@ public class Table extends javax.swing.JPanel {
             singleclick.setClickCountToStart(1);
             jTable.setDefaultEditor(String.class, singleclick);
         } else {
-            jTable.setDefaultEditor(String.class, null);
+            if (jTable.getDefaultEditor(String.class) instanceof DefaultCellEditor) {
+                jTable.setDefaultEditor(String.class, null);
+            }
         }
     }
     
@@ -110,10 +122,18 @@ public class Table extends javax.swing.JPanel {
             model = new SpinnerNumberModel(Byte.valueOf((byte)0), Byte.valueOf(Byte.MIN_VALUE), Byte.valueOf(Byte.MAX_VALUE), Byte.valueOf((byte)1));
             jTable.setDefaultRenderer(Byte.class, new SpinnerTableRenderer(model));
         } else {
-            jTable.setDefaultEditor(Integer.class, null);
-            jTable.setDefaultEditor(Byte.class, null);
-            jTable.setDefaultRenderer(Integer.class, null);
-            jTable.setDefaultRenderer(Byte.class, null);
+            if (jTable.getDefaultEditor(Integer.class) instanceof SpinnerTableEditor) {
+                jTable.setDefaultEditor(Integer.class, null);
+            }
+            if (jTable.getDefaultEditor(Byte.class) instanceof SpinnerTableEditor) {
+                jTable.setDefaultEditor(Byte.class, null);
+            }
+            if (jTable.getDefaultRenderer(Integer.class) instanceof SpinnerTableRenderer) {
+                jTable.setDefaultRenderer(Integer.class, null);
+            }
+            if (jTable.getDefaultRenderer(Byte.class) instanceof SpinnerTableRenderer) {
+                jTable.setDefaultRenderer(Byte.class, null);
+            }
         }
     }
     
@@ -303,16 +323,27 @@ public class Table extends javax.swing.JPanel {
     
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
         if (tableModel == null) return;
-        int[] rows = jTable.getSelectedRows();
-        int row = rows.length == 0 ? -1 : rows[rows.length-1];
-        if (tableModel.addRow(row)) {
-            jTable.setRowSelectionInterval(row+1, row+1);
+        SelectionInterval[] selection = splitIntoIntervals(jTable.getSelectedRows());
+        if (selection == null || selection.length == 0) {
+            selection = new SelectionInterval[] { new SelectionInterval(tableModel.getRowCount()-1, tableModel.getRowCount()-1) };
+        }
+        TableActionData oldData = new TableActionData(tableModel.getTableData(), selection);
+        jTable.clearSelection();
+        for (int i = selection.length-1; i >= 0; i--) {
+            SelectionInterval interval = tableModel.addRows(selection[i].start(), selection[i].end());
+            jTable.addRowSelectionInterval(interval.start(), interval.end());
+        }
+        if (oldData.tableData().length != tableModel.getRowCount()) {
+            //If a row was added
+            TableActionData newData = new TableActionData(tableModel.getTableData(), splitIntoIntervals(jTable.getSelectedRows()));
+            ActionManager.setActionWithoutExecute(new TableAction(this, "Add Rows", this::actionSetTableData, newData, this::actionSetTableData, oldData));
         }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
     private void jButtonRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveActionPerformed
         if (tableModel == null) return;
         SelectionInterval[] selection = splitIntoIntervals(jTable.getSelectedRows());
+        TableActionData oldData = new TableActionData(tableModel.getTableData(), selection);
         jTable.clearSelection();
         int totalShift = 0;
         for (int i = 0; i < selection.length; i++) {
@@ -322,38 +353,90 @@ public class Table extends javax.swing.JPanel {
                 jTable.addRowSelectionInterval(interval.start(), interval.end());
             }
         }
+        if (oldData.tableData().length != tableModel.getRowCount()) {
+            //If a row was removed
+            TableActionData newData = new TableActionData(tableModel.getTableData(), splitIntoIntervals(jTable.getSelectedRows()));
+            ActionManager.setActionWithoutExecute(new TableAction(this, "Delete Rows", this::actionSetTableData, newData, this::actionSetTableData, oldData));
+        }
     }//GEN-LAST:event_jButtonRemoveActionPerformed
 
     private void jButtonCloneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloneActionPerformed
         if (tableModel == null) return;
         SelectionInterval[] selection = splitIntoIntervals(jTable.getSelectedRows());
+        TableActionData oldData = new TableActionData(tableModel.getTableData(), selection);
         jTable.clearSelection();
         for (int i = selection.length-1; i >= 0; i--) {
             SelectionInterval interval = tableModel.cloneRows(selection[i].start(), selection[i].end());
             jTable.addRowSelectionInterval(interval.start(), interval.end());
+        }
+        if (oldData.tableData().length != tableModel.getRowCount()) {
+            //If a row was added
+            TableActionData newData = new TableActionData(tableModel.getTableData(), splitIntoIntervals(jTable.getSelectedRows()));
+            ActionManager.setActionWithoutExecute(new TableAction(this, "Clone Rows", this::actionSetTableData, newData, this::actionSetTableData, oldData));
         }
     }//GEN-LAST:event_jButtonCloneActionPerformed
 
     private void jButtonUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpActionPerformed
         if (tableModel == null) return;
         SelectionInterval[] selection = splitIntoIntervals(jTable.getSelectedRows());
+        TableActionData oldData = new TableActionData(tableModel.getTableData(), selection);
         jTable.clearSelection();
+        boolean selectionChanged = false;
         for (int i = 0; i < selection.length; i++) {
             SelectionInterval interval = tableModel.shiftUp(selection[i].start(), selection[i].end());
+            if (interval.start() != selection[i].start() || interval.end() != selection[i].end()) {
+                selectionChanged = true;
+            }
             jTable.addRowSelectionInterval(interval.start(), interval.end());
+        }
+        if (selectionChanged) {
+            //If a row was shifted
+            TableActionData newData = new TableActionData(tableModel.getTableData(), splitIntoIntervals(jTable.getSelectedRows()));
+            ActionManager.setActionWithoutExecute(new TableAction(this, "Shift Rows Up", this::actionSetTableData, newData, this::actionSetTableData, oldData));
         }
     }//GEN-LAST:event_jButtonUpActionPerformed
 
     private void jButtonDownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownActionPerformed
         if (tableModel == null) return;
         SelectionInterval[] selection = splitIntoIntervals(jTable.getSelectedRows());
+        TableActionData oldData = new TableActionData(tableModel.getTableData(), selection);
         jTable.clearSelection();
+        boolean selectionChanged = false;
         for (int i = 0; i < selection.length; i++) {
             SelectionInterval interval = tableModel.shiftDown(selection[i].start(), selection[i].end());
+            if (interval.start() != selection[i].start() || interval.end() != selection[i].end()) {
+                selectionChanged = true;
+            }
             jTable.addRowSelectionInterval(interval.start(), interval.end());
+        }
+        if (selectionChanged) {
+            //If a row was shifted
+            TableActionData newData = new TableActionData(tableModel.getTableData(), splitIntoIntervals(jTable.getSelectedRows()));
+            ActionManager.setActionWithoutExecute(new TableAction(this, "Shift Rows Down", this::actionSetTableData, newData, this::actionSetTableData, oldData));
         }
     }//GEN-LAST:event_jButtonDownActionPerformed
         
+    private void actionSetTableData(TableActionData data) {
+        int selMin = Integer.MAX_VALUE;
+        int selMax = Integer.MIN_VALUE;
+        tableModel.setTableData(data.tableData());
+        jTable.clearSelection();
+        SelectionInterval[] selection = data.selection();
+        for (int i = 0; i < selection.length; i++) {
+            if (selection[i].start() != -1 && selection[i].end() != -1) {
+                jTable.addRowSelectionInterval(selection[i].start(), selection[i].end());
+                if (ActionManager.isActionTriggering()) {
+                    if (selection[i].start() < selMin) selMin = selection[i].start();
+                    if (selection[i].end() > selMax) selMax = selection[i].end();
+                }
+            }
+        }
+        if (ActionManager.isActionTriggering()) {
+            int index = selMin + (selMax-selMin)/2;
+            jTable.scrollRectToVisible(jTable.getCellRect(index, 0, true));
+        }
+    }
+    
     public synchronized void addTableModelListener(TableModelListener l) {
         jTable.getModel().addTableModelListener(l);
     }
@@ -368,6 +451,23 @@ public class Table extends javax.swing.JPanel {
 
     public synchronized void removeListSelectionListenerModelListener(ListSelectionListener l) {
         jTable.getSelectionModel().removeListSelectionListener(l);
+    }
+
+    @Override
+    public void requestFocus() {
+        jTable.requestFocus();
+    }
+
+    @Override
+    public String toString() {
+        String name = getName();
+        if (name == null) {
+            TitledBorder border = (TitledBorder)getBorder();
+            if (border != null) {
+                return border.getTitle();
+            }
+        }
+        return tableModel.getClass().toString();
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

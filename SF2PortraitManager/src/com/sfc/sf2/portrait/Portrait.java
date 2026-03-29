@@ -5,6 +5,7 @@
  */
 package com.sfc.sf2.portrait;
 
+import com.sfc.sf2.core.INameable;
 import com.sfc.sf2.graphics.Tile;
 import static com.sfc.sf2.graphics.Tile.PIXEL_HEIGHT;
 import static com.sfc.sf2.graphics.Tile.PIXEL_WIDTH;
@@ -12,12 +13,13 @@ import com.sfc.sf2.graphics.Tileset;
 import com.sfc.sf2.palette.Palette;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 /**
  *
  * @author wiz
  */
-public class Portrait {
+public class Portrait implements INameable {
     
     public static final int PORTRAIT_TILES_FULL_WIDTH = 8;
     public static final int PORTRAIT_TILES_WIDTH = 6;
@@ -131,5 +133,15 @@ public class Portrait {
     
     public void clearIndexedColorImage() {
         indexedColorImage = null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Portrait)) return super.equals(obj);
+        Portrait other = (Portrait)obj;
+        if (this.index != other.index || !this.tileset.equals(other.tileset)) return false;
+        if (!Arrays.deepEquals(this.eyeTiles, other.eyeTiles)) return false;
+        if (!Arrays.deepEquals(this.mouthTiles, other.mouthTiles)) return false;
+        return true;
     }
 }

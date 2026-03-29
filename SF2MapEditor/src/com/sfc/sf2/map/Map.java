@@ -5,10 +5,11 @@
  */
 package com.sfc.sf2.map;
 
-import com.sfc.sf2.map.block.MapBlock;
+import com.sfc.sf2.core.INameable;
 import com.sfc.sf2.map.layout.MapLayout;
 import com.sfc.sf2.map.animation.MapAnimation;
 import com.sfc.sf2.map.block.MapBlockset;
+import com.sfc.sf2.map.layout.BlockFlags;
 import static com.sfc.sf2.map.layout.MapLayout.BLOCK_WIDTH;
 import com.sfc.sf2.map.layout.MapLayoutBlock;
 
@@ -16,7 +17,8 @@ import com.sfc.sf2.map.layout.MapLayoutBlock;
  *
  * @author wiz
  */
-public class Map {
+public class Map implements INameable {
+    private String name;
     private MapBlockset blockset;
     private MapLayout layout;
     private MapArea[] areas;
@@ -28,7 +30,8 @@ public class Map {
     private MapItem[] otherItems;
     private MapAnimation animation;
 
-    public Map(MapBlockset blockset, MapLayout layout, MapArea[] areas, MapFlagCopyEvent[] flagCopies, MapCopyEvent[] stepCopies, MapCopyEvent[] roofCopies, MapWarpEvent[] warps, MapItem[] chestItems, MapItem[] otherItems, MapAnimation animation) {
+    public Map(String name, MapBlockset blockset, MapLayout layout, MapArea[] areas, MapFlagCopyEvent[] flagCopies, MapCopyEvent[] stepCopies, MapCopyEvent[] roofCopies, MapWarpEvent[] warps, MapItem[] chestItems, MapItem[] otherItems, MapAnimation animation) {
+        this.name = name;
         this.blockset = blockset;
         this.layout = layout;
         this.areas = areas;
@@ -39,6 +42,10 @@ public class Map {
         this.chestItems = chestItems;
         this.otherItems = otherItems;
         this.animation = animation;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public MapBlockset getBlockset() {
@@ -121,14 +128,14 @@ public class Map {
         this.animation = animation;
     }
 
-    public void setActionFlag(int x, int y, int value) {
+    public void setActionFlag(int x, int y, BlockFlags value) {
         MapLayoutBlock block = this.layout.getBlocks()[y*BLOCK_WIDTH+x];
-        int origFlags = block.getFlags();
-        int newValue = value;
-        if ((origFlags & MapLayoutBlock.MAP_FLAG_STEP) != 0 && newValue == MapLayoutBlock.MAP_FLAG_SHOW) {
-            newValue = MapLayoutBlock.MAP_FLAG_STEP;
+        BlockFlags origFlags = block.getFlags();
+        BlockFlags newValue = value.clone();
+        if (origFlags.isFlagOn(BlockFlags.MAP_FLAG_STEP) && newValue.equals(BlockFlags.MAP_FLAG_SHOW)) {
+            newValue.setValue(BlockFlags.MAP_FLAG_STEP);
         }
-        int newFlags = (origFlags & MapLayoutBlock.MAP_FLAG_HIDE)+(newValue & 0x3FFF);
+        BlockFlags newFlags = new BlockFlags((origFlags.value() & BlockFlags.MAP_FLAG_HIDE)+(newValue.value() & 0x3FFF));
         block.setFlags(newFlags);
     }
 }

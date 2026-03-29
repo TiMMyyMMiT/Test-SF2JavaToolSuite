@@ -33,20 +33,20 @@ public class BattleSceneLayoutPanel extends AbstractLayoutPanel {
     protected static final int BATTLESPRITE_ALLY_BASE_Y = 64;
     protected static final int BATTLESPRITE_ENEMY_BASE_X = 0;
     protected static final int BATTLESPRITE_ENEMY_BASE_Y = 56;
-    protected static final int BATTLESPRITE_INVOCATION_BASE_X = 120;
-    protected static final int BATTLESPRITE_INVOCATION_BASE_Y = 40;
+    protected static final int BATTLESPRITE_INVOCATION_BASE_X = -128;
+    protected static final int BATTLESPRITE_INVOCATION_BASE_Y = -128;
     protected static final int WEAPONSPRITE_BASE_X = 136;
     protected static final int WEAPONSPRITE_BASE_Y = 64;
     
-    private Background bg;
-    private Ground ground;
+    protected Background bg;
+    protected Ground ground;
     
     private boolean showPositions = false;
     
     public BattleSceneLayoutPanel() {
         super();
         background = new LayoutBackground(Color.BLACK);
-        scale = new LayoutScale(1);
+        scale = new LayoutScale();
         grid = null;
         coordsGrid = null;
         coordsHeader = null;
@@ -82,9 +82,17 @@ public class BattleSceneLayoutPanel extends AbstractLayoutPanel {
         g2.drawRect(BATTLESPRITE_ENEMY_BASE_X, BATTLESPRITE_ENEMY_BASE_Y, 16*PIXEL_WIDTH, 12*PIXEL_HEIGHT);
     }
 
-    public void setBackground(Background background) {
+    public Background getBg() {
+        return bg;
+    }
+
+    public void setBg(Background background) {
         this.bg = background;
         redraw();
+    }
+
+    public Ground getGround() {
+        return ground;
     }
 
     public void setGround(Ground ground) {

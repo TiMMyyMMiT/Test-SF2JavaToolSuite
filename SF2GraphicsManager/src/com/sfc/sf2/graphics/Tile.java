@@ -9,6 +9,7 @@ import com.sfc.sf2.palette.Palette;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
+import java.util.Arrays;
 
 /**
  *
@@ -185,19 +186,12 @@ public class Tile {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return this == null;
-        if (obj == this) return true;
-        if (!(obj instanceof Tile)) return false;
+        if (!(obj instanceof Tile)) return super.equals(obj);
         Tile tile = (Tile)obj;
         if (tile.id != this.id) {
             return false;
         }
-        for (int i=0; i < pixels.length; i++) {
-            if (this.pixels[i] != tile.pixels[i]) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.equals(this.pixels, tile.pixels);
     }
     
     public static Tile paletteSwap(Tile tile, Palette palette) {

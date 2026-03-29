@@ -5,12 +5,17 @@
  */
 package com.sfc.sf2.background.gui;
 
+import com.sfc.sf2.background.Background;
 import com.sfc.sf2.background.BackgroundManager;
-import com.sfc.sf2.background.settings.BackgroundSettings;
+import com.sfc.sf2.graphics.settings.ExportSettings;
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.NonCombinableAction;
+import com.sfc.sf2.core.actions.RadioButtonAction;
 import com.sfc.sf2.core.gui.AbstractMainEditor;
 import com.sfc.sf2.core.gui.controls.Console;
 import com.sfc.sf2.core.io.FileFormat;
 import com.sfc.sf2.core.settings.SettingsManager;
+import com.sfc.sf2.core.settings.ViewSettings;
 import com.sfc.sf2.helpers.PathHelpers;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -22,12 +27,15 @@ import javax.swing.JRadioButton;
  */
 public class BackgroundMainEditor extends AbstractMainEditor {
     
-    private final BackgroundSettings backgroundSettings = new BackgroundSettings();
-    BackgroundManager backgroundManager = new BackgroundManager();
-    private boolean settingFileFormat = false;
+    private final ViewSettings viewSettings = new ViewSettings();
+    private final ExportSettings backgroundSettings = new ExportSettings();
+    private final BackgroundManager backgroundManager = new BackgroundManager();
+    
+    private JRadioButton actionPreviousFormat = null;
     
     public BackgroundMainEditor() {
         super();
+        SettingsManager.registerSettingsStore("view", viewSettings);
         SettingsManager.registerSettingsStore("background", backgroundSettings);
         initComponents();
         initCore(console1);
@@ -37,18 +45,24 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     protected void initEditor() {
         super.initEditor();
         
-        backgroundLayoutPanel.setShowGrid(jCheckBox6.isSelected());
-        backgroundLayoutPanel.setDisplayScale(jComboBox6.getSelectedIndex()+1);
-        
-        jRadioButton1.setSelected(backgroundSettings.getExportFileFormat() == FileFormat.PNG);
-        jRadioButton2.setSelected(backgroundSettings.getExportFileFormat() != FileFormat.PNG);
+        backgroundsViewPanel1.setLayoutPanel(backgroundLayoutPanel, viewSettings);
+        if (backgroundSettings.getExportFileFormat() == FileFormat.PNG) {
+            actionPreviousFormat = jRadioButtonPNG;
+            jRadioButtonPNG.setSelected(true);
+        } else {
+            actionPreviousFormat = jRadioButtonGIF;
+            jRadioButtonGIF.setSelected(true);
+        }
     }
     
     @Override
     protected void onDataLoaded() {
         super.onDataLoaded();
-        
-        backgroundLayoutPanel.setBackgrounds(backgroundManager.getBackgrounds());
+        ActionManager.setAndExecuteAction(new NonCombinableAction<Background[]>(this, "Backgrounds Imported", this::actionBackgroundLoaded, backgroundManager.getBackgrounds(), backgroundLayoutPanel.getBackgrounds()));
+    }
+    
+    private void actionBackgroundLoaded(Background[] backgrounds) {
+        backgroundLayoutPanel.setBackgrounds(backgrounds);
     }
     
     /**
@@ -60,7 +74,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroupExport = new javax.swing.ButtonGroup();
+        buttonGroupExport = new com.sfc.sf2.core.gui.controls.NameableButtonGroup();
         jPanel13 = new javax.swing.JPanel();
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel15 = new javax.swing.JPanel();
@@ -71,37 +85,34 @@ public class BackgroundMainEditor extends AbstractMainEditor {
         jPanel4 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         infoButton1 = new com.sfc.sf2.core.gui.controls.InfoButton();
-        directoryButton1 = new com.sfc.sf2.core.gui.controls.DirectoryButton();
+        directoryButtonImportBackgrounds = new com.sfc.sf2.core.gui.controls.DirectoryButton();
         jButton18 = new javax.swing.JButton();
         jPanel9 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         infoButton3 = new com.sfc.sf2.core.gui.controls.InfoButton();
-        directoryButton2 = new com.sfc.sf2.core.gui.controls.DirectoryButton();
+        directoryButtonImportImages = new com.sfc.sf2.core.gui.controls.DirectoryButton();
         jButton12 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanel11 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         infoButton4 = new com.sfc.sf2.core.gui.controls.InfoButton();
-        directoryButton3 = new com.sfc.sf2.core.gui.controls.DirectoryButton();
+        directoryButtonExportBackgrounds = new com.sfc.sf2.core.gui.controls.DirectoryButton();
         jButton2 = new javax.swing.JButton();
         jPanel14 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         infoButton5 = new com.sfc.sf2.core.gui.controls.InfoButton();
-        directoryButton4 = new com.sfc.sf2.core.gui.controls.DirectoryButton();
+        directoryButtonExportImages = new com.sfc.sf2.core.gui.controls.DirectoryButton();
         jPanel12 = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        jRadioButtonPNG = new javax.swing.JRadioButton();
+        jRadioButtonGIF = new javax.swing.JRadioButton();
         jLabel4 = new javax.swing.JLabel();
         infoButton2 = new com.sfc.sf2.core.gui.controls.InfoButton();
         jButton13 = new javax.swing.JButton();
         jPanel10 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         backgroundLayoutPanel = new com.sfc.sf2.background.gui.BackgroundLayoutPanel();
-        jPanel22 = new javax.swing.JPanel();
-        jComboBox6 = new javax.swing.JComboBox<>();
-        jLabel18 = new javax.swing.JLabel();
-        jCheckBox6 = new javax.swing.JCheckBox();
+        backgroundsViewPanel1 = new com.sfc.sf2.background.gui.BackgroundsViewPanel();
         console1 = new com.sfc.sf2.core.gui.controls.Console();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -122,9 +133,10 @@ public class BackgroundMainEditor extends AbstractMainEditor {
         infoButton1.setMessageText("<html>Loads all Background disassembly files with the name pattern \"backgroundXX.bin\".</html>");
         infoButton1.setText("");
 
-        directoryButton1.setDirectoryPath(".\\");
-            directoryButton1.setInfoMessage("");
-            directoryButton1.setLabelText("BGs directory :");
+        directoryButtonImportBackgrounds.setDirectoryPath(".\\");
+            directoryButtonImportBackgrounds.setInfoMessage("");
+            directoryButtonImportBackgrounds.setLabelText("BGs directory :");
+            directoryButtonImportBackgrounds.setName("Import Backgrounds"); // NOI18N
 
             jButton18.setText("Import");
             jButton18.addActionListener(new java.awt.event.ActionListener() {
@@ -140,7 +152,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                 .addGroup(jPanel4Layout.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(directoryButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
+                        .addComponent(directoryButtonImportBackgrounds, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
                         .addGroup(jPanel4Layout.createSequentialGroup()
                             .addGap(0, 0, Short.MAX_VALUE)
                             .addComponent(jButton18))
@@ -159,7 +171,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(infoButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(directoryButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(directoryButtonImportBackgrounds, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(jButton18)
                     .addContainerGap())
@@ -172,9 +184,10 @@ public class BackgroundMainEditor extends AbstractMainEditor {
             infoButton3.setMessageText("<html>Loads all Background disassembly files with the name pattern \"backgroundXX.bin\".<br>Supported image formats: PNG or GIF. Automatically detects images of supported formats with the naming pattern \"backgroundXX.png\".<br><br>Color format should be 4BPP / 16 indexed colors. Images of 8BPP / 256 indexed colors will be converted to 4 BPP / 16 (some colors may be lost).<br>Colors will be convered to CRAM format (the color format used by the SEGA Genesis).<br>Color index 0 is treated as transparent.</html>");
             infoButton3.setText("");
 
-            directoryButton2.setDirectoryPath(".\\export\\");
-                directoryButton2.setInfoMessage("");
-                directoryButton2.setLabelText("Images directory :");
+            directoryButtonImportImages.setDirectoryPath(".\\export\\");
+                directoryButtonImportImages.setInfoMessage("");
+                directoryButtonImportImages.setLabelText("Images directory :");
+                directoryButtonImportImages.setName("Import Images"); // NOI18N
 
                 jButton12.setText("Import");
                 jButton12.addActionListener(new java.awt.event.ActionListener() {
@@ -190,7 +203,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(directoryButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
+                            .addComponent(directoryButtonImportImages, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(jButton12))
@@ -209,7 +222,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(infoButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(directoryButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(directoryButtonImportImages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton12)
                         .addContainerGap())
@@ -239,9 +252,10 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                 infoButton4.setMessageText("<html>Exports Backgrounds as individual disassembly files. File name pattern is \"backgroundXX.bin\".</html>");
                 infoButton4.setText("");
 
-                directoryButton3.setDirectoryPath(".\\");
-                    directoryButton3.setInfoMessage("");
-                    directoryButton3.setLabelText("BGs directory :");
+                directoryButtonExportBackgrounds.setDirectoryPath(".\\");
+                    directoryButtonExportBackgrounds.setInfoMessage("");
+                    directoryButtonExportBackgrounds.setLabelText("BGs directory :");
+                    directoryButtonExportBackgrounds.setName("Export Backgrounds"); // NOI18N
 
                     jButton2.setText("Export");
                     jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -257,7 +271,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                         .addGroup(jPanel11Layout.createSequentialGroup()
                             .addContainerGap()
                             .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(directoryButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
+                                .addComponent(directoryButtonExportBackgrounds, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
                                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                                     .addGap(0, 0, Short.MAX_VALUE)
                                     .addComponent(jButton2))
@@ -276,7 +290,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(infoButton4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(directoryButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(directoryButtonExportBackgrounds, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jButton2)
                             .addContainerGap())
@@ -289,26 +303,29 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                     infoButton5.setMessageText("<html>Saves all Backgrounds as individual images with the name pattern \"backgroundXX.png\".<br>Supported image formats: PNG or GIF.<br><br>Exported color format will be 4BPP / 16 indexed colors.</html>");
                     infoButton5.setText("");
 
-                    directoryButton4.setDirectoryPath(".\\export\\");
-                        directoryButton4.setInfoMessage("");
-                        directoryButton4.setLabelText("Images directory :");
+                    directoryButtonExportImages.setDirectoryPath(".\\export\\");
+                        directoryButtonExportImages.setInfoMessage("");
+                        directoryButtonExportImages.setLabelText("Images directory :");
+                        directoryButtonExportImages.setName("Export Images"); // NOI18N
 
                         jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-                        buttonGroupExport.add(jRadioButton1);
-                        jRadioButton1.setSelected(true);
-                        jRadioButton1.setText("PNG");
-                        jRadioButton1.addChangeListener(new javax.swing.event.ChangeListener() {
-                            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                                RadioStateChanged_Png(evt);
+                        buttonGroupExport.add(jRadioButtonPNG);
+                        jRadioButtonPNG.setSelected(true);
+                        jRadioButtonPNG.setText("PNG");
+                        jRadioButtonPNG.setName("Radio Format PNG"); // NOI18N
+                        jRadioButtonPNG.addItemListener(new java.awt.event.ItemListener() {
+                            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                                jRadioButtonFormatStateChanged(evt);
                             }
                         });
 
-                        buttonGroupExport.add(jRadioButton2);
-                        jRadioButton2.setText("GIF");
-                        jRadioButton2.addChangeListener(new javax.swing.event.ChangeListener() {
-                            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                                RadioStateChanged_Gif(evt);
+                        buttonGroupExport.add(jRadioButtonGIF);
+                        jRadioButtonGIF.setText("GIF");
+                        jRadioButtonGIF.setName("Radio Format GIF"); // NOI18N
+                        jRadioButtonGIF.addItemListener(new java.awt.event.ItemListener() {
+                            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                                jRadioButtonFormatStateChanged(evt);
                             }
                         });
 
@@ -325,9 +342,9 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                                 .addContainerGap()
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButton1)
+                                .addComponent(jRadioButtonPNG)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButton2)
+                                .addComponent(jRadioButtonGIF)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(infoButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap())
@@ -338,8 +355,8 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                                 .addContainerGap()
                                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                                     .addComponent(infoButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButton2)
-                                    .addComponent(jRadioButton1)
+                                    .addComponent(jRadioButtonGIF)
+                                    .addComponent(jRadioButtonPNG)
                                     .addComponent(jLabel4))
                                 .addContainerGap())
                         );
@@ -358,7 +375,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                             .addGroup(jPanel14Layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(directoryButton4, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
+                                    .addComponent(directoryButtonExportImages, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
                                     .addGroup(jPanel14Layout.createSequentialGroup()
                                         .addGap(0, 0, Short.MAX_VALUE)
                                         .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -379,7 +396,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(infoButton5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(directoryButton4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(directoryButtonExportImages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jButton13)
@@ -414,9 +431,9 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
                                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
+                                .addGap(0, 0, 0))
                         );
 
                         jSplitPane2.setLeftComponent(jPanel8);
@@ -436,48 +453,6 @@ public class BackgroundMainEditor extends AbstractMainEditor {
 
                         jScrollPane2.setViewportView(backgroundLayoutPanel);
 
-                        jPanel22.setBorder(javax.swing.BorderFactory.createTitledBorder("View"));
-
-                        jComboBox6.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "x1", "x2", "x3", "x4" }));
-                        jComboBox6.addActionListener(new java.awt.event.ActionListener() {
-                            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jComboBox6ActionPerformed(evt);
-                            }
-                        });
-
-                        jLabel18.setText("Scale :");
-
-                        jCheckBox6.setText("Show grid");
-                        jCheckBox6.addActionListener(new java.awt.event.ActionListener() {
-                            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jCheckBox6ActionPerformed(evt);
-                            }
-                        });
-
-                        javax.swing.GroupLayout jPanel22Layout = new javax.swing.GroupLayout(jPanel22);
-                        jPanel22.setLayout(jPanel22Layout);
-                        jPanel22Layout.setHorizontalGroup(
-                            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel22Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jCheckBox6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel18)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
-                        );
-                        jPanel22Layout.setVerticalGroup(
-                            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
-                                .addGap(0, 0, 0)
-                                .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                                    .addComponent(jLabel18)
-                                    .addComponent(jCheckBox6)
-                                    .addComponent(jComboBox6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap())
-                        );
-
                         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
                         jPanel10.setLayout(jPanel10Layout);
                         jPanel10Layout.setHorizontalGroup(
@@ -485,17 +460,18 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                             .addGroup(jPanel10Layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPanel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
-                                .addGap(0, 0, 0))
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                                    .addGroup(jPanel10Layout.createSequentialGroup()
+                                        .addComponent(backgroundsViewPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                        .addContainerGap())))
                         );
                         jPanel10Layout.setVerticalGroup(
                             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel10Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
-                                .addGap(0, 0, 0)
-                                .addComponent(jPanel22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, 0))
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(backgroundsViewPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
                         );
 
                         jSplitPane2.setRightComponent(jPanel10);
@@ -522,7 +498,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                         );
                         jPanel13Layout.setVerticalGroup(
                             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSplitPane1)
+                            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE)
                         );
 
                         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -541,7 +517,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
                     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButton3.getDirectoryPath());
+        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButtonExportBackgrounds.getDirectoryPath());
         if (!PathHelpers.createPathIfRequred(directoryPath)) return;
         try {
             backgroundManager.exportAllDisassemblies(directoryPath, backgroundLayoutPanel.getBackgrounds());
@@ -552,10 +528,10 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
-        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButton4.getDirectoryPath());
+        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButtonExportImages.getDirectoryPath());
         if (!PathHelpers.createPathIfRequred(directoryPath)) return;
         try {
-            FileFormat format = jRadioButton1.isSelected() ? FileFormat.PNG : FileFormat.GIF;
+            FileFormat format = jRadioButtonPNG.isSelected() ? FileFormat.PNG : FileFormat.GIF;
             backgroundManager.exportAllImages(directoryPath, backgroundLayoutPanel.getBackgrounds(), format);
         } catch (Exception ex) {
             Console.logger().log(Level.SEVERE, null, ex);
@@ -564,7 +540,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     }//GEN-LAST:event_jButton13ActionPerformed
 
     private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
-        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButton2.getDirectoryPath());
+        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButtonImportImages.getDirectoryPath());
         try {
             FileFormat format = FileFormat.ANY_IMAGE;
             backgroundManager.importAllImages(directoryPath, format);
@@ -577,7 +553,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton18ActionPerformed
-        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButton1.getDirectoryPath());
+        Path directoryPath = PathHelpers.getBasePath().resolve(directoryButtonImportBackgrounds.getDirectoryPath());
         try {
             backgroundManager.importAllDisassemblies(directoryPath);
         } catch (Exception ex) {
@@ -588,39 +564,21 @@ public class BackgroundMainEditor extends AbstractMainEditor {
         onDataLoaded(); 
     }//GEN-LAST:event_jButton18ActionPerformed
 
-    private void jComboBox6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox6ActionPerformed
-        backgroundLayoutPanel.setDisplayScale(jComboBox6.getSelectedIndex()+1);
-    }//GEN-LAST:event_jComboBox6ActionPerformed
-
-    private void jCheckBox6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox6ActionPerformed
-        backgroundLayoutPanel.setShowGrid(jCheckBox6.isSelected());
-    }//GEN-LAST:event_jCheckBox6ActionPerformed
-
-    private void RadioStateChanged_Png(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_RadioStateChanged_Png
-        if (settingFileFormat) return;
-        settingFileFormat = true;
-        JRadioButton radioButton = (JRadioButton)evt.getSource();
-        if (radioButton != null && radioButton.isSelected() && backgroundSettings.getExportFileFormat() != FileFormat.PNG) {
-            FileFormat format = FileFormat.PNG;
-            jRadioButton1.setSelected(true);
-            backgroundSettings.setExportFileFormat(format);
-            SettingsManager.saveSettingsFile();
+    private void jRadioButtonFormatStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jRadioButtonFormatStateChanged
+        if (!ActionManager.isActionTriggering()) {
+            ActionManager.setActionWithoutExecute(new RadioButtonAction(buttonGroupExport, (JRadioButton)evt.getSource(), actionPreviousFormat));
         }
-        settingFileFormat = false;
-    }//GEN-LAST:event_RadioStateChanged_Png
-
-    private void RadioStateChanged_Gif(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_RadioStateChanged_Gif
-        if (settingFileFormat) return;
-        settingFileFormat = true;
-        JRadioButton radioButton = (JRadioButton)evt.getSource();
-        if (radioButton != null && radioButton.isSelected() && backgroundSettings.getExportFileFormat() != FileFormat.GIF) {
-            FileFormat format = FileFormat.GIF;
-            jRadioButton2.setSelected(true);
-            backgroundSettings.setExportFileFormat(format);
-            SettingsManager.saveSettingsFile();
+        actionPreviousFormat = (JRadioButton)evt.getSource();
+        switch (actionPreviousFormat.getActionCommand()) {
+            case "PNG":
+                break;
+            case "GIF":
+                break;
         }
-        settingFileFormat = false;
-    }//GEN-LAST:event_RadioStateChanged_Gif
+        FileFormat format = actionPreviousFormat.getActionCommand().equals("PNG") ? FileFormat.PNG : FileFormat.GIF;
+        backgroundSettings.setExportFileFormat(format);
+        SettingsManager.saveSettingsFile();
+    }//GEN-LAST:event_jRadioButtonFormatStateChanged
     
     /**
      * To create a new Main Editor, copy the below code
@@ -640,12 +598,13 @@ public class BackgroundMainEditor extends AbstractMainEditor {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.sfc.sf2.background.gui.BackgroundLayoutPanel backgroundLayoutPanel;
-    private javax.swing.ButtonGroup buttonGroupExport;
+    private com.sfc.sf2.background.gui.BackgroundsViewPanel backgroundsViewPanel1;
+    private com.sfc.sf2.core.gui.controls.NameableButtonGroup buttonGroupExport;
     private com.sfc.sf2.core.gui.controls.Console console1;
-    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButton1;
-    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButton2;
-    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButton3;
-    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButton4;
+    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButtonExportBackgrounds;
+    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButtonExportImages;
+    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButtonImportBackgrounds;
+    private com.sfc.sf2.core.gui.controls.DirectoryButton directoryButtonImportImages;
     private com.sfc.sf2.core.gui.controls.InfoButton infoButton1;
     private com.sfc.sf2.core.gui.controls.InfoButton infoButton2;
     private com.sfc.sf2.core.gui.controls.InfoButton infoButton3;
@@ -655,10 +614,7 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     private javax.swing.JButton jButton13;
     private javax.swing.JButton jButton18;
     private javax.swing.JButton jButton2;
-    private javax.swing.JCheckBox jCheckBox6;
-    private javax.swing.JComboBox<String> jComboBox6;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -669,14 +625,13 @@ public class BackgroundMainEditor extends AbstractMainEditor {
     private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel15;
-    private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
+    private javax.swing.JRadioButton jRadioButtonGIF;
+    private javax.swing.JRadioButton jRadioButtonPNG;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;

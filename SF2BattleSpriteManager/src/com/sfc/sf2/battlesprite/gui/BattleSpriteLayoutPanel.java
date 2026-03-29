@@ -7,6 +7,8 @@ package com.sfc.sf2.battlesprite.gui;
 
 import com.sfc.sf2.battlesprite.BattleSprite;
 import static com.sfc.sf2.battlesprite.BattleSprite.BATTLE_SPRITE_TILE_HEIGHT;
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.BasicAction;
 import com.sfc.sf2.core.gui.AbstractLayoutPanel;
 import com.sfc.sf2.core.gui.layout.*;
 import com.sfc.sf2.core.gui.layout.LayoutAnimator.AnimationController;
@@ -18,6 +20,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 
 /**
  *
@@ -28,23 +31,22 @@ public class BattleSpriteLayoutPanel extends AbstractLayoutPanel implements Anim
     public BattleSpriteLayoutPanel() {
         super();
         background = new LayoutBackground(Color.LIGHT_GRAY, PIXEL_WIDTH/2);
-        scale = new LayoutScale(1);
+        scale = new LayoutScale();
         grid = new LayoutGrid(PIXEL_WIDTH, PIXEL_WIDTH, -1, BATTLE_SPRITE_TILE_HEIGHT*PIXEL_HEIGHT);
         coordsGrid = new LayoutCoordsGridDisplay(0, BATTLE_SPRITE_TILE_HEIGHT*PIXEL_HEIGHT, false, 0, 0, 2);
         coordsHeader = null;
-        mouseInput = null;
+        mouseInput = new LayoutMouseInput(this, this::onMouseButtonInput, null, 1, 1);
         scroller = new LayoutScrollNormaliser(this);
         animator = new LayoutAnimator(this);
     }
     
     private BattleSprite battleSprite;
-    private int currentPalette;
     
     private boolean showStatusMarker = false;
     
     @Override
     protected boolean hasData() {
-        return battleSprite != null && (currentPalette >= 0 && currentPalette < battleSprite.getPalettes().length);
+        return battleSprite != null;
     }
 
     @Override
@@ -112,22 +114,30 @@ public class BattleSpriteLayoutPanel extends AbstractLayoutPanel implements Anim
 
     public void setBattleSprite(BattleSprite battleSprite) {
         this.battleSprite = battleSprite;
-    }
-    
-    public int getCurrentPalette() {
-        return currentPalette;
-    }
-
-    public void setCurrentPalette(int currentPalette) {
-        this.currentPalette = currentPalette;
-        if (battleSprite != null) {
-            battleSprite.setRenderPalette(battleSprite.getPalettes()[currentPalette]);
             redraw();
-        }
     }
 
     public void setShowStatusMarker(boolean showStatusMarker) {
         this.showStatusMarker = showStatusMarker;
         redraw();
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Input">  
+    private void onMouseButtonInput(BaseMouseCoordsComponent.GridMousePressedEvent evt) {
+        if (!showStatusMarker) return;
+        if (battleSprite == null) return;
+        if (evt.pressed() || evt.dragging()) {
+            Point newValue = new Point(evt.x(), evt.y());
+            if (newValue.y > BATTLE_SPRITE_TILE_HEIGHT*PIXEL_HEIGHT) {
+                newValue.y = newValue.y % (BATTLE_SPRITE_TILE_HEIGHT*PIXEL_HEIGHT);
+            }
+            ActionManager.setAndExecuteAction(new BasicAction<Point>(this, "Move Status", this::actionMoveStatusMarker, newValue, battleSprite.getStatusOffsetPos()));
+        }
+    }
+    
+    private void actionMoveStatusMarker(Point point) {
+        battleSprite.setStatusOffsetPos(point);
+        redraw();
+    }
+    // </editor-fold>
 }

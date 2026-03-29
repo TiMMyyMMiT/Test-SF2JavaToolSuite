@@ -5,6 +5,8 @@
  */
 package com.sfc.sf2.battle;
 
+import java.awt.Point;
+
 /**
  *
  * @author wiz
@@ -16,6 +18,15 @@ public class Ally {
     public Ally(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Point getPos() {
+        return new Point(x, y);
+    }
+
+    public void setPos(Point pos) {
+        this.x = pos.x;
+        this.y = pos.y;
     }
 
     public int getX() {
@@ -32,6 +43,13 @@ public class Ally {
 
     public void setY(int y) {
         this.y = y;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Ally)) return super.equals(obj);
+        Ally other = (Ally)obj;
+        return this.x == other.x && this.y == other.y;
     }
 
     @Override

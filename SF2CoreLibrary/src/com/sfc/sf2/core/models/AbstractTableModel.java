@@ -5,7 +5,12 @@
  */
 package com.sfc.sf2.core.models;
 
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.BasicAction;
+import com.sfc.sf2.core.actions.TableCellAction;
+import com.sfc.sf2.core.actions.TableCellActionData;
 import com.sfc.sf2.core.gui.controls.Console;
+import com.sfc.sf2.core.gui.controls.Table;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +22,14 @@ import javax.swing.ComboBoxModel;
  */
 public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTableModel {
 
-    private String[] columns;
-    
+    private Table linkedTable;    
+    private String[] columns;    
     private List<T> tableItems = new ArrayList();
     private int rowLimit;
+    
+    public void setLinkedTable(Table linkedTable) {
+        this.linkedTable = linkedTable;
+    }
     
     /**
      *
@@ -32,6 +41,10 @@ public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTa
         this.rowLimit = rowLimit;
     }
 
+    public Object[] getTableData() {
+        return tableItems.toArray();
+    }
+
     public T[] getTableData(Class<T[]> type) {
         T[] data = type.cast(Array.newInstance(type.getComponentType(), tableItems.size()));
         for (int i = 0; i < data.length; i++) {
@@ -41,6 +54,19 @@ public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTa
     }
 
     public void setTableData(T[] tableData) {
+        if (ActionManager.isActionTriggering()) {
+            actionSetTableData(tableData);
+        } else {
+            ActionManager.setAndExecuteAction(new BasicAction(this, "Table Data Added", this::actionSetTableData, tableData, getTableData()));
+        }
+    }
+    
+    private void actionSetTableData(Object data) {
+        T[] tableData = (T[])data;
+        actionSetTableData(tableData);
+    }
+    
+    private void actionSetTableData(T[] tableData) {
         this.tableItems.clear();
         if (tableData != null) {
             for (int i = 0; i < tableData.length; i++) {
@@ -87,6 +113,14 @@ public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTa
         return tableItems.get(row);
     }
     
+    public void SetRow(int row, T data) {
+        if (row < 0 || row >= tableItems.size()) {
+            return;
+        }
+        tableItems.set(row, data);
+        fireTableRowsUpdated(row, row);
+    }
+    
     @Override
     public Object getValueAt(int row, int col) {
         if (row < 0 || row >= tableItems.size() || col < 0 || col >= columns.length) {
@@ -97,9 +131,29 @@ public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTa
     
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if (row < 0 || row >= tableItems.size() || col < 0 || col >= columns.length) {
-            return;
+        if (row < 0 || row >= tableItems.size() || col < 0 || col >= columns.length) return;
+        if (value == null && getValueAt(row, col) == null) return;
+        if (value.equals(getValueAt(row, col))) return;
+        
+        if (ActionManager.isActionTriggering()) {
+            actionSetValueAt(row, col, value);
+        } else {
+            TableCellActionData newValue = new TableCellActionData(this, row, col, value);
+            TableCellActionData oldValue = new TableCellActionData(this, row, col, getValueAt(row, col));
+            ActionManager.setAndExecuteAction(new TableCellAction(linkedTable, "Cell Changed", this::actionSetValueAt, newValue, oldValue));
         }
+    }
+    
+    private void actionSetValueAt(TableCellActionData data) {
+        actionSetValueAt(data.row(), data.column(), data.data());
+        linkedTable.jTable.clearSelection();
+        linkedTable.jTable.setRowSelectionInterval(data.row(), data.row());
+        if (ActionManager.isActionTriggering()) {
+            linkedTable.jTable.scrollRectToVisible(linkedTable.jTable.getCellRect(data.row(), 0, true));
+        }
+    }
+    
+    private void actionSetValueAt(int row, int col, Object value) {
         tableItems.set(row, setValue(tableItems.get(row), row, col, value));
         fireTableCellUpdated(row, col);
     }
@@ -108,19 +162,31 @@ public abstract class AbstractTableModel<T> extends javax.swing.table.AbstractTa
         return rowLimit == -1 || tableItems.size() < rowLimit;
     }
     
-    public boolean addRow(int row) {
+    public SelectionInterval addRows(int start, int end) {
+        int count = end-start+1;
+        for (int i = 0; i < count; i++) {
+            addRow(end+1);
+        }
+        fireTableRowsInserted(start, end);        
+        int dif = end-start;
+        start = end+1;
+        end = start+dif;
+        if (start >= tableItems.size())
+            start = tableItems.size()-1;
+        if (end >= tableItems.size())
+            end = tableItems.size()-1;
+        return new SelectionInterval(start, end);
+    }
+    
+    private void addRow(int row) {
         if (rowLimit > -1 && tableItems.size() >= rowLimit) {
             Console.logger().warning("WARNING Cannot create new row because already at limit");
-            return false;
+            return;
         }
         if (tableItems.isEmpty() || row < 0 || row >= tableItems.size()) {
             tableItems.add(createBlankItem(tableItems.size()));
-            fireTableRowsInserted(0, 0);
-            return true;
         } else {
-            tableItems.add(row+1, createBlankItem(row+1));
-            fireTableRowsInserted(row+1, row+1);
-            return true;
+            tableItems.add(row, createBlankItem(row));
         }
     }
     

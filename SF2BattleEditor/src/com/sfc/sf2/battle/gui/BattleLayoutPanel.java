@@ -11,7 +11,11 @@ import com.sfc.sf2.battle.Ally;
 import com.sfc.sf2.battle.Battle;
 import com.sfc.sf2.battle.BattleSpriteset;
 import com.sfc.sf2.battle.Enemy;
+import com.sfc.sf2.battle.actions.SpritesetPosActionData;
+import com.sfc.sf2.battle.actions.SpritesetRegionActionData;
 import com.sfc.sf2.battle.mapterrain.gui.BattleMapTerrainLayoutPanel;
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.CustomAction;
 import com.sfc.sf2.core.gui.layout.BaseMouseCoordsComponent;
 import static com.sfc.sf2.graphics.Block.PIXEL_HEIGHT;
 import static com.sfc.sf2.graphics.Block.PIXEL_WIDTH;
@@ -85,8 +89,8 @@ public class BattleLayoutPanel extends BattleMapTerrainLayoutPanel {
         super.drawImage(graphics);
         Graphics2D g2 = (Graphics2D)graphics;
         
-        int x = battle.getMapCoords().getX();
-        int y = battle.getMapCoords().getY();
+        int x = battle.getBattleCoords().getX();
+        int y = battle.getBattleCoords().getY();
         drawAllies(g2, x, y);
         drawEnemies(g2, x, y);
         drawAIRegions(g2, x, y);
@@ -335,17 +339,17 @@ public class BattleLayoutPanel extends BattleMapTerrainLayoutPanel {
     private void drawAIRegionNode(Graphics graphics) {
         //Draw a node to show closest node to mouse cursor (when in AI Region edit mode)
         if (spritesetMode != SpritesetPaintMode.AiRegion || selectedSpritesetEntity == -1) return;
-        int battleX = battle.getMapCoords().getX();
-        int battleY = battle.getMapCoords().getY();
+        int battleX = battle.getBattleCoords().getX();
+        int battleY = battle.getBattleCoords().getY();
         AIRegion region = battle.getSpriteset().getAiRegions()[selectedSpritesetEntity];
         Point point = region.getPoint(closestRegionPoint);
-        int scale = getDisplayScale();
+        float scale = this.getRenderScale();
         int nodeX = (battleX+point.x)*PIXEL_WIDTH;
         int nodeY = (battleY+point.y)*PIXEL_HEIGHT;
         graphics.setColor(Color.CYAN);
-        graphics.fillArc((nodeX+8)*scale, (nodeY+8)*scale, 12*scale, 12*scale, 0, 360);
+        graphics.fillArc((int)((nodeX+12)*scale), (int)((nodeY+12)*scale), (int)(16*scale), (int)(16*scale), 0, 360);
         graphics.setColor(Color.BLUE);
-        graphics.fillArc((nodeX+16)*scale, (nodeY+16)*scale, 8*scale, 8*scale, 0, 360);
+        graphics.fillArc((int)((nodeX+14)*scale), (int)((nodeY+14)*scale), (int)(12*scale), (int)(12*scale), 0, 360);
     }
 
     public void setSpritesetEditedListener(ActionListener spritesetEditedListener) {
@@ -451,8 +455,8 @@ public class BattleLayoutPanel extends BattleMapTerrainLayoutPanel {
     
     private void onMouseMove(BaseMouseCoordsComponent.GridMouseMoveEvent evt) {
         if (spritesetMode == SpritesetPaintMode.AiRegion && selectedSpritesetEntity >= 0) {
-            int x = evt.x() - battle.getMapCoords().getX();
-            int y = evt.y() - battle.getMapCoords().getY();
+            int x = evt.x() - battle.getBattleCoords().getX();
+            int y = evt.y() - battle.getBattleCoords().getY();
             int region = findClosestRegionPoint(battle.getSpriteset().getAiRegions()[selectedSpritesetEntity], x, y);
             if (closestRegionPoint != region) {
                 closestRegionPoint = region;
@@ -473,54 +477,90 @@ public class BattleLayoutPanel extends BattleMapTerrainLayoutPanel {
         if (selectedSpritesetEntity == -1) return;
         
         //Edit spritesets
-        int x = evt.x() - battle.getMapCoords().getX();
-        int y = evt.y() - battle.getMapCoords().getY();
-        switch (evt.mouseButton()) {
-            case MouseEvent.BUTTON1:
-                switch (spritesetMode) {
-                    case Ally:
-                        Ally ally = battle.getSpriteset().getAllies()[selectedSpritesetEntity];
-                        ally.setX(x);
-                        ally.setY(y);
-                        redraw();
-                        if (spritesetEditedListener != null) {
-                            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "Ally"));
-                        }
-                        break;
-                    case Enemy:
-                        Enemy enemy = battle.getSpriteset().getEnemies()[selectedSpritesetEntity];
-                        enemy.setX(x);
-                        enemy.setY(y);
-                        redraw();
-                        if (spritesetEditedListener != null) {
-                            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "Enemy"));
-                        }
-                        break;
-                    case AiRegion:
-                        AIRegion region = battle.getSpriteset().getAiRegions()[selectedSpritesetEntity];
-                        if (evt.dragging()) {
-                            Point point = region.getPoint(closestRegionPoint);
-                            point.x = x;
-                            point.y = y;
-                            redraw();
-                            if (spritesetEditedListener != null) {
-                                spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "AiRegion"));
-                            }
-                        } else {
-                            closestRegionPoint = findClosestRegionPoint(region, x, y);
-                            this.repaint();
-                        }
-                        break;
-                    case AiPoint:
-                        AIPoint point = battle.getSpriteset().getAiPoints()[selectedSpritesetEntity];
-                        point.setX(x);
-                        point.setY(y);
-                        redraw();
-                        if (spritesetEditedListener != null) {
-                            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "AiPoint"));
-                        }
-                        break;
+        int x = evt.x() - battle.getBattleCoords().getX();
+        int y = evt.y() - battle.getBattleCoords().getY();
+        if (evt.mouseButton() == MouseEvent.BUTTON1) {
+            switch (spritesetMode) {
+                case Ally:
+                {
+                    Ally ally = battle.getSpriteset().getAllies()[selectedSpritesetEntity];
+                    Point point = new Point(x, y);
+                    if (!ally.getPos().equals(point)) {
+                        SpritesetPosActionData newValue = new SpritesetPosActionData(ally, point);
+                        SpritesetPosActionData oldValue = new SpritesetPosActionData(ally, ally.getPos());
+                        ActionManager.setAndExecuteAction(new CustomAction<SpritesetPosActionData>(this, "Move Ally", this::actionAllyPosChanged, newValue, oldValue));
+                    }
+                    break;
                 }
+                case Enemy:
+                {
+                    Enemy enemy = battle.getSpriteset().getEnemies()[selectedSpritesetEntity];
+                    Point point = new Point(x, y);
+                    if (!enemy.getPos().equals(point)) {
+                        SpritesetPosActionData newValue = new SpritesetPosActionData(enemy, point);
+                        SpritesetPosActionData oldValue = new SpritesetPosActionData(enemy, enemy.getPos());
+                        ActionManager.setAndExecuteAction(new CustomAction<SpritesetPosActionData>(this, "Move Enemy", this::actionEnemyPosChanged, newValue, oldValue));
+                    }
+                    break;
+                }
+                case AiRegion:
+                {
+                    AIRegion region = battle.getSpriteset().getAiRegions()[selectedSpritesetEntity];
+                    if (evt.pressed()) {
+                        closestRegionPoint = findClosestRegionPoint(region, x, y);
+                    }
+                    Point point = new Point(x, y);
+                    if (!region.getPoint(closestRegionPoint).equals(point)) {
+                        SpritesetRegionActionData newValue = new SpritesetRegionActionData(region, closestRegionPoint, point);
+                        SpritesetRegionActionData oldValue = new SpritesetRegionActionData(region, closestRegionPoint, region.getPoint(closestRegionPoint));
+                        ActionManager.setAndExecuteAction(new CustomAction<SpritesetRegionActionData>(this, "Move AI Region", this::actionAIRegionPosChanged, newValue, oldValue));
+                    }
+                }
+                    break;
+                case AiPoint:
+                {
+                    AIPoint aiPoint = battle.getSpriteset().getAiPoints()[selectedSpritesetEntity];
+                    Point point = new Point(x, y);
+                    if (!aiPoint.getPos().equals(point)) {
+                        SpritesetPosActionData newValue = new SpritesetPosActionData(aiPoint, point);
+                        SpritesetPosActionData oldValue = new SpritesetPosActionData(aiPoint, aiPoint.getPos());
+                        ActionManager.setAndExecuteAction(new CustomAction<SpritesetPosActionData>(this, "Move AI Point", this::actionAIPointPosChanged, newValue, oldValue));
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void actionAllyPosChanged(SpritesetPosActionData value) {
+        Ally ally = (Ally)value.item();
+        ally.setPos(value.pos());
+        redraw();
+        if (spritesetEditedListener != null) {
+            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "Ally"));
+        }
+    }
+    
+    private void actionEnemyPosChanged(SpritesetPosActionData value) {
+        Enemy enemy = (Enemy)value.item();
+        enemy.setPos(value.pos());
+        if (spritesetEditedListener != null) {
+            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "Enemy"));
+        }
+    }
+    
+    private void actionAIRegionPosChanged(SpritesetRegionActionData value) {
+        value.region().setPoint(value.regionPoint(), value.pos());
+        if (spritesetEditedListener != null) {
+            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "AiRegion"));
+        }
+    }
+    
+    private void actionAIPointPosChanged(SpritesetPosActionData value) {
+        AIPoint point = (AIPoint)value.item();
+        point.setPos(value.pos());
+        if (spritesetEditedListener != null) {
+            spritesetEditedListener.actionPerformed(new ActionEvent(this, selectedSpritesetEntity, "AiPoint"));
         }
     }
     

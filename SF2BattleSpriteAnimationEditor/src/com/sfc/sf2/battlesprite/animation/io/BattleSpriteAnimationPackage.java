@@ -11,4 +11,4 @@ import com.sfc.sf2.battlesprite.BattleSprite;
  *
  * @author TiMMy
  */
-public record BattleSpriteAnimationPackage(BattleSprite battleSprite) { }
+public record BattleSpriteAnimationPackage(String name, BattleSprite battleSprite) { }

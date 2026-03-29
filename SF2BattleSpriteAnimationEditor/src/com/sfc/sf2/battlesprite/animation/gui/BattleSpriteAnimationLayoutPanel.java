@@ -37,7 +37,7 @@ public class BattleSpriteAnimationLayoutPanel extends BattleSceneLayoutPanel imp
     public BattleSpriteAnimationLayoutPanel() {
         super();
         background = new LayoutBackground(Color.BLACK);
-        scale = new LayoutScale(1);
+        scale = new LayoutScale();
         grid = null;
         coordsGrid = null;
         coordsHeader = null;
@@ -60,6 +60,8 @@ public class BattleSpriteAnimationLayoutPanel extends BattleSceneLayoutPanel imp
     protected void drawImage(Graphics graphics) {
         super.drawImage(graphics);
         
+        if (animator.getFrame() >= animation.getFrameCount())
+            animator.setFrame(0);
         BattleSpriteAnimationFrame animFrame = animation.getFrames()[animator.getFrame()];
         Tileset spriteFrame = null;
         spriteFrame = battlesprite.getFrames()[animFrame.getBattleSpriteIndex()];   
@@ -111,6 +113,10 @@ public class BattleSpriteAnimationLayoutPanel extends BattleSceneLayoutPanel imp
     public void setBattlesprite(BattleSprite battlesprite) {
         this.battlesprite = battlesprite;
         redraw();
+    }
+
+    public WeaponSprite getWeaponsprite() {
+        return weaponsprite;
     }
 
     public void setWeaponsprite(WeaponSprite weaponsprite) {

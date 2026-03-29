@@ -5,6 +5,9 @@
  */
 package com.sfc.sf2.map.block.gui;
 
+import com.sfc.sf2.core.actions.ActionManager;
+import com.sfc.sf2.core.actions.CumulativeAction;
+import com.sfc.sf2.core.actions.CustomAction;
 import com.sfc.sf2.core.gui.layout.BaseMouseCoordsComponent.GridMousePressedEvent;
 import com.sfc.sf2.core.gui.layout.LayoutGrid;
 import com.sfc.sf2.core.gui.layout.LayoutMouseInput;
@@ -13,11 +16,15 @@ import static com.sfc.sf2.graphics.Tile.PIXEL_HEIGHT;
 import static com.sfc.sf2.graphics.Tile.PIXEL_WIDTH;
 import com.sfc.sf2.graphics.TileFlags;
 import com.sfc.sf2.helpers.MapBlockHelpers;
+import com.sfc.sf2.helpers.RenderScaleHelpers;
 import com.sfc.sf2.map.block.MapTile;
+import com.sfc.sf2.map.block.actions.BlockTileActionData;
+import com.sfc.sf2.map.block.actions.TileFlagsActionData;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 /**
  *
@@ -41,6 +48,7 @@ public class EditableBlockSlotPanel extends BlockSlotPanel {
     private TileSlotPanel rightTileSlotPanel;
     
     private BlockSlotEditMode currentMode = BlockSlotEditMode.MODE_PAINT_TILE;
+    private boolean actionSetFlagOn;
     private boolean showPriorityFlag;
     
     private ActionListener blockEditedListener;
@@ -49,7 +57,7 @@ public class EditableBlockSlotPanel extends BlockSlotPanel {
         super();
         grid = new LayoutGrid(PIXEL_WIDTH, PIXEL_HEIGHT);
         mouseInput = new LayoutMouseInput(this, this::onMouseButtonInput, PIXEL_WIDTH, PIXEL_HEIGHT);
-        setDisplayScale(4);
+        setRenderScaleIndex(RenderScaleHelpers.stringToIndex("4x"));
     }
     
     @Override
@@ -109,56 +117,70 @@ public class EditableBlockSlotPanel extends BlockSlotPanel {
         if (evt.released()) return;
         if (block == null) return;
         int index = evt.x()+evt.y()*TILE_WIDTH;
-        switch (currentMode) {
-            case MODE_PAINT_TILE:
+        MapTile tile = block.getMapTiles()[index];
+        if (currentMode == BlockSlotEditMode.MODE_PAINT_TILE) {
+            MapTile newTile = null;
+            if (evt.mouseButton() == MouseEvent.BUTTON1) {
+                newTile = leftTileSlotPanel.getTile();
+            } else if (evt.mouseButton() == MouseEvent.BUTTON3) {
+                newTile = rightTileSlotPanel.getTile();
+            }
+            
+            if (newTile != null && tile.getTileIndex() != newTile.getTileIndex()) {
+                BlockTileActionData newValue = new BlockTileActionData(block, newTile.clone(), index);
+                BlockTileActionData oldValue = new BlockTileActionData(block, tile, index);
+                ActionManager.setAndExecuteAction(new CumulativeAction<BlockTileActionData>(this, "Set Block Tile", this::ActionChangeTile, newValue, oldValue));
+            }
+        } else {
+            if (tile == null) return;
+            TileFlags newFlag = null;
+            boolean flagOn = false;
+            if (currentMode == BlockSlotEditMode.MODE_TOGGLE_FLIP) {
                 if (evt.mouseButton() == MouseEvent.BUTTON1) {
-                    MapTile leftSlotTile = leftTileSlotPanel.getTile();
-                    if (leftSlotTile != null) {
-                        MapTile[] tiles = block.getMapTiles();
-                        tiles[index] = leftSlotTile.clone();
-                        onBlockEdited();
-                    }
-                }
-                else if (evt.mouseButton() == MouseEvent.BUTTON3) {
-                    MapTile rightSlotTile = rightTileSlotPanel.getTile();
-                    if (rightSlotTile != null) {
-                        MapTile[] tiles = block.getMapTiles();
-                        tiles[index] = rightSlotTile.clone();
-                        onBlockEdited();
-                    }
-                }
-                break;
-            case MODE_TOGGLE_FLIP:
-                MapTile tile = block.getMapTiles()[index];
-                if (evt.mouseButton() == MouseEvent.BUTTON1) {
-                    tile = tile.clone();
-                    tile.getTileFlags().toggleFlag(TileFlags.TILE_FLAG_HFLIP);
-                }
-                else if (evt.mouseButton() == MouseEvent.BUTTON2) {
-                    TileFlags flags = block.getMapTiles()[index].getTileFlags();
-                    if (flags.isHFlip() || flags.isVFlip()) {
-                        tile = tile.clone();
-                        flags = tile.getTileFlags();
-                        flags.removeFlag(TileFlags.TILE_FLAG_HFLIP);
-                        flags.removeFlag(TileFlags.TILE_FLAG_VFLIP);
-                    }
-                }
-                else if (evt.mouseButton() == MouseEvent.BUTTON3) {
-                    tile = tile.clone();
-                    tile.getTileFlags().toggleFlag(TileFlags.TILE_FLAG_VFLIP);
-                }
-                block.getMapTiles()[index] = tile;
-                onBlockEdited();
-                break;
-            case MODE_TOGGLE_PRIORITY:
-                if (evt.mouseButton() == MouseEvent.BUTTON1) {
-                    block.getMapTiles()[index].getTileFlags().addFlag(TileFlags.TILE_FLAG_PRIORITY);
-                    onBlockEdited();
+                    newFlag = new TileFlags(TileFlags.TILE_FLAG_HFLIP);
+                    flagOn = !tile.getTileFlags().isHFlip();
+                } else if (evt.mouseButton() == MouseEvent.BUTTON2) {
+                    newFlag = new TileFlags(TileFlags.TILE_FLAG_BOTHFLIP);
+                    flagOn = false;
                 } else if (evt.mouseButton() == MouseEvent.BUTTON3) {
-                    block.getMapTiles()[index].getTileFlags().removeFlag(TileFlags.TILE_FLAG_PRIORITY);
-                    onBlockEdited();
+                    newFlag = new TileFlags(TileFlags.TILE_FLAG_VFLIP);
+                    flagOn = !tile.getTileFlags().isVFlip();
                 }
-                break;
+            } else if (currentMode == BlockSlotEditMode.MODE_TOGGLE_PRIORITY) {
+                if (evt.mouseButton() == MouseEvent.BUTTON1) {
+                    newFlag = new TileFlags(TileFlags.TILE_FLAG_PRIORITY);
+                    flagOn = true;
+                } else if (evt.mouseButton() == MouseEvent.BUTTON3) {
+                    newFlag = new TileFlags(TileFlags.TILE_FLAG_PRIORITY);
+                    flagOn = false;
+                }
+            }
+            
+            if (newFlag != null) {
+                if (evt.pressed() && (!newFlag.equals(TileFlags.TILE_FLAG_BOTHFLIP) || !newFlag.equals(TileFlags.TILE_FLAG_PRIORITY))) {
+                    actionSetFlagOn = (tile.getTileFlags().value() | newFlag.value()) == 0;
+                }
+                if (actionSetFlagOn != flagOn) {
+                    TileFlagsActionData newValue = new TileFlagsActionData(block, newFlag, flagOn, index);
+                    TileFlagsActionData oldValue = new TileFlagsActionData(block, newFlag, actionSetFlagOn, index);
+                    ActionManager.setAndExecuteAction(new CumulativeAction<TileFlagsActionData>(this, "Set Tile Flags", this::ActionSetMultipleTileFlags, newValue, oldValue));
+                }
+            }
         }
+    }
+    
+    private void ActionChangeTile(List<BlockTileActionData> values) {
+        for (BlockTileActionData value : values) {
+            value.block().getMapTiles()[value.tileIndex()] = value.tile();
+        }
+        onBlockEdited();
+    }
+    
+    private void ActionSetMultipleTileFlags(List<TileFlagsActionData> values) {
+        for (TileFlagsActionData value : values) {
+            TileFlags flag = value.block().getMapTiles()[value.tileIndex()].getTileFlags();
+            flag.setFlag(value.flag().value(), value.flagOn());
+        }
+        onBlockEdited();
     }
 }

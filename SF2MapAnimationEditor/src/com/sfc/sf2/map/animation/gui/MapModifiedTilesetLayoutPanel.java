@@ -36,7 +36,9 @@ public class MapModifiedTilesetLayoutPanel extends MapAnimationTilesetLayoutPane
     
     public void setSelectedTileset(int tileset) {
         selectedTileset = tileset;
-        if (selectedTileset == -1) {
+        if (mapAnimation == null) {
+            setTileset(null);
+        } else if (selectedTileset == -1) {
             setTileset(mapAnimation.getAnimationTileset());
         } else {
             setTileset(mapAnimation.getModifiedTilesets()[selectedTileset]);
@@ -48,7 +50,7 @@ public class MapModifiedTilesetLayoutPanel extends MapAnimationTilesetLayoutPane
         if (play && hasData()) {
             selectedFrame = 0;
             MapAnimationFrame[] frames = mapAnimation.getFrames();
-            animator.startAnimation(frames[selectedFrame].getDelay(), frames.length-1, true, true);
+            animator.startAnimation(frames[selectedFrame].getDelay(), frames.length-1, true, 0, true);
         } else {
             animator.stopAnimation();
         }

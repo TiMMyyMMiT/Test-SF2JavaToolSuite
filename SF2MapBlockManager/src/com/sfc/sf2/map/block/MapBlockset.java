@@ -5,27 +5,36 @@
  */
 package com.sfc.sf2.map.block;
 
+import com.sfc.sf2.core.INameable;
 import static com.sfc.sf2.graphics.Block.PIXEL_HEIGHT;
 import static com.sfc.sf2.graphics.Block.PIXEL_WIDTH;
 import com.sfc.sf2.graphics.Tileset;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 /**
  *
  * @author TiMMy
  */
-public class MapBlockset {
+public class MapBlockset implements INameable {
     
+    private String name;
     protected MapBlock[] blocks;
     protected int blocksPerRow;
     
     private BufferedImage indexedColorImage = null;
     
-    public MapBlockset(MapBlock[] blocks, int blocksPerRow) {
+    public MapBlockset(String name, MapBlock[] blocks, int blocksPerRow) {
+        this.name = name;
         this.blocks = blocks;
         this.blocksPerRow = blocksPerRow;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
     
     public MapBlock[] getBlocks() {
@@ -126,20 +135,14 @@ public class MapBlockset {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return this == null;
-        if (obj == this) return true;
-        if (!(obj instanceof MapBlockset)) return false;
+        if (!(obj instanceof MapBlockset)) return super.equals(obj);
         MapBlockset blockset = (MapBlockset)obj;
-        for (int i=0; i < this.blocks.length; i++) {
-            if (!this.blocks[i].equals(blockset.getBlocks()[i])) {
-                return false;
-            }
-        }
+        if (!Arrays.equals(this.blocks, blockset.blocks)) return false;
         return true;
     }
     
     public MapBlockset clone() {
-        return new MapBlockset(this.blocks.clone(), this.blocksPerRow);
+        return new MapBlockset(this.name, this.blocks.clone(), this.blocksPerRow);
     }
     
     public boolean isBlocksetEmpty() {
@@ -160,6 +163,6 @@ public class MapBlockset {
         for(int i=0; i < blocks.length; i++) {
             blocks[i] = emptyBlock;
         }
-        return new MapBlockset(blocks, blocksPerRow);
+        return new MapBlockset("Empty", blocks, blocksPerRow);
     }
 }

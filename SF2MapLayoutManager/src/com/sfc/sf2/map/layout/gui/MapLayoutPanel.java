@@ -37,7 +37,7 @@ public class MapLayoutPanel extends AbstractLayoutPanel {
     public MapLayoutPanel() {
         super();
         background = new LayoutBackground(Color.LIGHT_GRAY, PIXEL_WIDTH/3);
-        scale = new LayoutScale(1);
+        scale = new LayoutScale();
         grid = new LayoutGrid(PIXEL_WIDTH, PIXEL_HEIGHT);
         coordsGrid = new LayoutCoordsGridDisplay(PIXEL_WIDTH, PIXEL_HEIGHT, false, 0, 0, 1);
         coordsHeader = new LayoutCoordsHeader(this, PIXEL_WIDTH, PIXEL_HEIGHT, false);
@@ -99,13 +99,13 @@ public class MapLayoutPanel extends AbstractLayoutPanel {
         for (int y=0; y < BLOCK_HEIGHT; y++) {
             for (int x=0; x < BLOCK_WIDTH; x++) {
                 if (showExplorationFlags) {
-                    ImageIcon icon = MapLayoutFlagIcons.getBlockExplorationFlagIcon(blocks[x+y*BLOCK_WIDTH].getExplorationFlags());
+                    ImageIcon icon = MapLayoutFlagIcons.getBlockExplorationFlagIcon(blocks[x+y*BLOCK_WIDTH].getFlags().getExplorationFlags());
                     if (icon != null) {
                         graphics.drawImage(icon.getImage(), x*PIXEL_WIDTH, y*PIXEL_HEIGHT, null); 
                     }
                 }
                 if (showInteractionFlags) {
-                    ImageIcon icon = MapLayoutFlagIcons.getBlockInteractionFlagIcon(blocks[x+y*BLOCK_WIDTH].getEventFlags());
+                    ImageIcon icon = MapLayoutFlagIcons.getBlockInteractionFlagIcon(blocks[x+y*BLOCK_WIDTH].getFlags().getEventFlags());
                     if (icon != null) {
                         graphics.drawImage(icon.getImage(), x*PIXEL_WIDTH, y*PIXEL_HEIGHT, null); 
                     }
@@ -116,8 +116,8 @@ public class MapLayoutPanel extends AbstractLayoutPanel {
     
     public void centerOnMapPoint(int mapX, int mapY) {
         if (BaseLayoutComponent.IsEnabled(scroller)) {
-            int scaleOffset = 15/getDisplayScale();
-            scroller.scrollToPosition((mapX-scaleOffset)*PIXEL_WIDTH*getDisplayScale(), (mapY-scaleOffset)*PIXEL_HEIGHT*getDisplayScale());
+            float scaleOffset = 15f/getRenderScale();
+            scroller.scrollToPosition((int)((mapX-scaleOffset)*PIXEL_WIDTH*getRenderScale()), (int)((mapY-scaleOffset)*PIXEL_HEIGHT*getRenderScale()));
         }
     }
 

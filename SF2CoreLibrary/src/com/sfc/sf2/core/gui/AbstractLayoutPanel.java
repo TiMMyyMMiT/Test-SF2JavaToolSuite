@@ -7,6 +7,7 @@ package com.sfc.sf2.core.gui;
 
 import com.sfc.sf2.core.gui.layout.*;
 import com.sfc.sf2.core.gui.layout.LayoutAnimator.AnimationListener;
+import com.sfc.sf2.helpers.RenderScaleHelpers;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -35,10 +36,6 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
     private BufferedImage currentImage;
     private boolean redraw = true;
 
-    public AbstractLayoutPanel() {
-        super();
-    }
-
     protected abstract boolean hasData();    
     protected abstract Dimension getImageDimensions();
     protected abstract void drawImage(Graphics graphics);
@@ -57,7 +54,7 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
                 if (dims.width > 0 && dims.height > 0) {
                     currentImage = paintImage(dims);
                     Dimension size = new Dimension(currentImage.getWidth()+offset.width, currentImage.getHeight()+offset.height);
-                    if (BaseLayoutComponent.IsEnabled(coordsGrid)) { coordsGrid.buildCoordsImage(dims, getDisplayScale()); }
+                    if (BaseLayoutComponent.IsEnabled(coordsGrid)) { coordsGrid.buildCoordsImage(dims, getRenderScale()); }
                     if (!size.equals(this.getSize())) {
                         setSize(size);
                         setPreferredSize(size);
@@ -68,7 +65,7 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
                 redraw = false;
             }
             g.drawImage(currentImage, offset.width, offset.height, this);
-            if (BaseLayoutComponent.IsEnabled(coordsGrid)) { coordsGrid.paintCoordsImage(g, getDisplayScale()); }
+            if (BaseLayoutComponent.IsEnabled(coordsGrid)) { coordsGrid.paintCoordsImage(g, getRenderScale()); }
         }
     }
     
@@ -81,7 +78,7 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
         drawImage(graphics);
         graphics.dispose();
         if (BaseLayoutComponent.IsEnabled(scale))  { currentImage = scale.resizeImage(currentImage); }
-        if (BaseLayoutComponent.IsEnabled(grid))  { grid.paintGrid(currentImage, getDisplayScale()); }
+        if (BaseLayoutComponent.IsEnabled(grid))  { grid.paintGrid(currentImage, getRenderScale()); }
         //paint after resize
         graphics = currentImage.getGraphics();
         //Cleanup
@@ -105,15 +102,15 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
     
     protected Dimension getImageOffset() {
         if (BaseLayoutComponent.IsEnabled(coordsGrid)) {
-            return coordsGrid.getOffset(getDisplayScale());
+            return coordsGrid.getOffset(getRenderScale());
         } else {
             return NO_OFFSET;
         }
     }
     
     private void updateMouseInputs(Dimension offset) {
-        if (BaseLayoutComponent.IsEnabled(coordsHeader)) { coordsHeader.updateDisplayParameters(getDisplayScale(), getPreferredSize(), offset); }
-        if (BaseLayoutComponent.IsEnabled(mouseInput)) { mouseInput.updateDisplayParameters(getDisplayScale(), getPreferredSize(), offset); }
+        if (BaseLayoutComponent.IsEnabled(coordsHeader)) { coordsHeader.updateDisplayParameters(getRenderScale(), getPreferredSize(), offset); }
+        if (BaseLayoutComponent.IsEnabled(mouseInput)) { mouseInput.updateDisplayParameters(getRenderScale(), getPreferredSize(), offset); }
     }
 
     public LayoutAnimator getAnimator() {
@@ -146,13 +143,17 @@ public abstract class AbstractLayoutPanel extends JPanel implements AnimationLis
         repaint();
     }
 
-    public int getDisplayScale() {
-        return BaseLayoutComponent.IsEnabled(scale) ? scale.getScale() : 1;
+    public float getRenderScale() {
+        return BaseLayoutComponent.IsEnabled(scale) ? scale.getScale() : 1f;
     }
 
-    public void setDisplayScale(int displayScale) {
-        if (scale != null && scale.getScale() != displayScale) {
-            scale.setScale(displayScale);
+    public int getRenderScaleIndex() {
+        return BaseLayoutComponent.IsEnabled(scale) ? scale.getScaleIndex(): RenderScaleHelpers.RENDER_SCALE_1X;
+    }
+
+    public void setRenderScaleIndex(int renderScaleIndex) {
+        if (scale != null && scale.getScaleIndex() != renderScaleIndex) {
+            scale.setScaleIndex(renderScaleIndex);
             redraw();
         }
     }

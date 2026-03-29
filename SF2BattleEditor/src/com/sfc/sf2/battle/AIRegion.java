@@ -6,12 +6,15 @@
 package com.sfc.sf2.battle;
 
 import java.awt.Point;
+import java.util.Arrays;
 
 /**
  *
  * @author wiz
  */
 public class AIRegion {
+    private static String[] typeToString = new String[] { "NONE", "??? (point?)", "??? (line?)", "Triangle", "Rectangle" };
+    
     private int type;
     private Point[] points = new Point[4];
 
@@ -35,12 +38,31 @@ public class AIRegion {
         this.type = type;
     }
     
+    public String getTypeString() {
+        if (type < 0 || type >= typeToString.length) {
+            return "???";
+        } else {
+            return typeToString[type];
+        }
+    }
+    
     public Point[] getPoints() {
         return points;
     }
     
     public Point getPoint(int index) {
         return points[index];
+    }
+    
+    public void setPoint(int index, Point point) {
+        points[index] = point;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AIRegion)) return super.equals(obj);
+        AIRegion other = (AIRegion)obj;
+        return this.type == other.type && Arrays.equals(this.points, other.points);
     }
     
     @Override
