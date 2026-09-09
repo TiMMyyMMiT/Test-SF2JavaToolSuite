@@ -155,17 +155,24 @@ public class DirectoryButton extends javax.swing.JPanel {
     }//GEN-LAST:event_infoButtonActionPerformed
 
     private void openFileChooser() {
-        File file = PathHelpers.getNearestValidParent(Path.of(jTextFieldPath.getText()));
+        String path = jTextFieldPath.getText();
+        if (path.startsWith("./")) {
+            path = path.substring(2);
+        }
+        Path filePath = PathHelpers.makeAbsolute(Path.of(path));
+        File file = PathHelpers.getNearestValidParent(Path.of(path));
         jFileChooserFiles.setCurrentDirectory(file);
         int returnVal = jFileChooserFiles.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            String path = jFileChooserFiles.getSelectedFile().toString();
+            String newPath;
             if (convertToRelativeDirectory) {
-                String basePath = PathHelpers.getBasePath().toString();
-                if (path.startsWith(basePath))
-                    path = path.replace(PathHelpers.getBasePath().toString(), ".");
+                newPath = PathHelpers.getBasePath().relativize(jFileChooserFiles.getSelectedFile().toPath()).toString();
+                if (!newPath.startsWith("."))
+                    newPath = "./" + newPath;
+            } else {
+                newPath = jFileChooserFiles.getSelectedFile().toString();
             }
-            ActionManager.setAndExecuteAction(new BasicAction<String>(this, "Directory Change", this::setPath, path, jTextFieldPath.getText()));
+            ActionManager.setAndExecuteAction(new BasicAction<String>(this, "Directory Change", this::setPath, newPath, jTextFieldPath.getText()));
         }
     }
 
