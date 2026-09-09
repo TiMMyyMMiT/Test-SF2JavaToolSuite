@@ -129,6 +129,7 @@
               <Properties>
                 <Property name="infoMessage" type="java.lang.String" value="&lt;html&gt;Base folder is where the .jar file is expected to be run from.&lt;br&gt;&lt;b&gt;Most users do not need to edit this path.&lt;/b&gt;&lt;/html&gt;"/>
                 <Property name="labelText" type="java.lang.String" value="Base folder :"/>
+                <Property name="useRelativeDirectory" type="boolean" value="false"/>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[150, 25]"/>
                 </Property>
@@ -141,6 +142,7 @@
               <Properties>
                 <Property name="infoMessage" type="java.lang.String" value="&lt;html&gt;Incbin is the root folder for the disassemby (usually SF2DISASM\u005cdisasm\u005c)&lt;br&gt;&lt;b&gt;Most users do not need to edit this path.&lt;/b&gt;&lt;/html&gt;" containsInvalidXMLChars="true"/>
                 <Property name="labelText" type="java.lang.String" value="incbin folder :"/>
+                <Property name="useRelativeDirectory" type="boolean" value="false"/>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[150, 25]"/>
                 </Property>

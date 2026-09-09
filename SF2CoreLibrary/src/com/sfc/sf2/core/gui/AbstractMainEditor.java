@@ -185,11 +185,13 @@ public abstract class AbstractMainEditor extends javax.swing.JFrame {
 
         directoryButtonBasePath.setInfoMessage("<html>Base folder is where the .jar file is expected to be run from.<br><b>Most users do not need to edit this path.</b></html>");
         directoryButtonBasePath.setLabelText("Base folder :");
+        directoryButtonBasePath.setUseRelativeDirectory(false);
         directoryButtonBasePath.setMinimumSize(new java.awt.Dimension(150, 25));
         directoryButtonBasePath.setPreferredSize(new java.awt.Dimension(200, 25));
 
         directoryButtonIncbinPath.setInfoMessage("<html>Incbin is the root folder for the disassemby (usually SF2DISASM\\disasm\\)<br><b>Most users do not need to edit this path.</b></html>");
         directoryButtonIncbinPath.setLabelText("incbin folder :");
+        directoryButtonIncbinPath.setUseRelativeDirectory(false);
         directoryButtonIncbinPath.setMinimumSize(new java.awt.Dimension(150, 25));
         directoryButtonIncbinPath.setPreferredSize(new java.awt.Dimension(200, 25));
 

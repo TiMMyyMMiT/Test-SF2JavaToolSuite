@@ -20,6 +20,8 @@ import javax.swing.JFileChooser;
  */
 public class DirectoryButton extends javax.swing.JPanel {
         
+    private boolean convertToRelativeDirectory = true;
+    
     /**
      * Creates new form FileButton
      */
@@ -64,6 +66,15 @@ public class DirectoryButton extends javax.swing.JPanel {
     public void setInfoMessage(String message) {
         infoButton.setMessageText(message);
         infoButton.setVisible(message != null && message.length() > 0);
+    }
+    
+    public boolean getUseRelativeDirectory() {
+        return convertToRelativeDirectory;
+    }
+    
+    @BeanProperty(preferred = true, visualUpdate = true, description = "If the selected path is within the base folder, the path will be trimmed to be a relative path")
+    public void setUseRelativeDirectory(boolean relative) {
+        convertToRelativeDirectory = relative;
     }
 
     /**
@@ -143,14 +154,17 @@ public class DirectoryButton extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_infoButtonActionPerformed
 
-    private static String PATH_ACTION = "SetPath";
     private void openFileChooser() {
         File file = PathHelpers.getNearestValidParent(Path.of(jTextFieldPath.getText()));
         jFileChooserFiles.setCurrentDirectory(file);
         int returnVal = jFileChooserFiles.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             String path = jFileChooserFiles.getSelectedFile().toString();
-            path = path.replace(PathHelpers.getBasePath().toString(), ".");
+            if (convertToRelativeDirectory) {
+                String basePath = PathHelpers.getBasePath().toString();
+                if (path.startsWith(basePath))
+                    path = path.replace(PathHelpers.getBasePath().toString(), ".");
+            }
             ActionManager.setAndExecuteAction(new BasicAction<String>(this, "Directory Change", this::setPath, path, jTextFieldPath.getText()));
         }
     }
