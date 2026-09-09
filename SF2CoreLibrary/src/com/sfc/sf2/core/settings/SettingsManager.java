@@ -71,7 +71,7 @@ public class SettingsManager {
     
     public static void registerSettingsStore(String id, AbstractSettings settings) {
         if (settings.getClass().toString().equals("GlobalSettings")) {
-            Console.logger().severe("Error: Cannot add another instance of \"Core\" settings.");
+            Console.logger().severe("Error: Cannot add another instance of \"Global\" settings.");
             return;
         } else if (settings.getClass().toString().equals("CoreSettings")) {
             Console.logger().severe("Error: Cannot add another instance of \"Core\" settings.");
