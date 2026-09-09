@@ -139,7 +139,7 @@ public class PaletteButton extends javax.swing.JButton {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setIcon(new javax.swing.ImageIcon("D:\\TiMMy\\Dev\\ShiningForce2\\SF2JavaToolsSuite\\SF2PaletteManager\\res\\Palette\\Icons\\Palette.png")); // NOI18N
+        setIcon(new javax.swing.ImageIcon(getClass().getResource("/Palette/Icons/Palette.png"))); // NOI18N
         setMaximumSize(new java.awt.Dimension(32, 32));
         setMinimumSize(new java.awt.Dimension(32, 32));
         setPreferredSize(new java.awt.Dimension(32, 32));
