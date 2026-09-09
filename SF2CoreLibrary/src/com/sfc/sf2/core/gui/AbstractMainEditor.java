@@ -295,6 +295,7 @@ public abstract class AbstractMainEditor extends javax.swing.JFrame {
         jLabel2.setMinimumSize(new java.awt.Dimension(100, 25));
         jLabel2.setPreferredSize(new java.awt.Dimension(100, 25));
 
+        jButtonDiscord.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Core/Icons/Logo_Discord.png"))); // NOI18N
         jButtonDiscord.setText("SF2 Hacking Discord");
         jButtonDiscord.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -302,6 +303,7 @@ public abstract class AbstractMainEditor extends javax.swing.JFrame {
             }
         });
 
+        jButtonGitHubIssues.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Core/Icons/Logo_Github.png"))); // NOI18N
         jButtonGitHubIssues.setText("Report an issue");
         jButtonGitHubIssues.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -348,7 +350,7 @@ public abstract class AbstractMainEditor extends javax.swing.JFrame {
                 .addComponent(jButtonGitHubIssues)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButtonVersionHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(46, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jFrameHelpLayout = new javax.swing.GroupLayout(jFrameHelp.getContentPane());
