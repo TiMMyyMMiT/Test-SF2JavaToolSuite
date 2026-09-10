@@ -32,12 +32,12 @@ public class BattleSpriteAnimationFramesTableModel extends AbstractTableModel<Ba
     public boolean isCellEditable(int row, int column) {
         if (column == 0) {
             return false;   //Cannot edit the index row
-        } else if (row == 0 && column <= 4) {
-            return false;   //Core data for first frame cannot be edited
-        } else if (column >= 5 && getRow(row).getType() == BattleSprite.BattleSpriteType.ENEMY) {
-            return false;   //Enemy weapon data cannot be edited
+        }
+        
+        if (getRow(row).getType() == BattleSprite.BattleSpriteType.ENEMY) {
+            return row >= 2 && column <= 4;  //Enemies cannot edit first 2 rows or weapon data
         } else {
-            return true;
+            return row != 0 || column > 4; //Allies cannot edit core data of first row
         }
     }
  
