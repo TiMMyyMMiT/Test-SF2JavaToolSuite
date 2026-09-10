@@ -1422,13 +1422,13 @@
                                                 <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="jSpinnerTilesPerRowStateChanged"/>
                                               </Events>
                                             </Component>
-                                            <Container class="com.sfc.sf2.palette.CRAMColorPicker" name="cRAMColor09">
+                                            <Container class="com.sfc.sf2.palette.gui.controls.CRAMColorPicker" name="cRAMColor09">
                                               <Properties>
                                                 <Property name="dialogTitle" type="java.lang.String" value="Spell Color 9"/>
                                                 <Property name="name" type="java.lang.String" value="Spell Color 9" noResource="true"/>
                                               </Properties>
                                               <Events>
-                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor09ColorChanged"/>
+                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.gui.controls.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor09ColorChanged"/>
                                               </Events>
 
                                               <Layout>
@@ -1444,13 +1444,13 @@
                                                 </DimensionLayout>
                                               </Layout>
                                             </Container>
-                                            <Container class="com.sfc.sf2.palette.CRAMColorPicker" name="cRAMColor13">
+                                            <Container class="com.sfc.sf2.palette.gui.controls.CRAMColorPicker" name="cRAMColor13">
                                               <Properties>
                                                 <Property name="dialogTitle" type="java.lang.String" value="Spell Color 13"/>
                                                 <Property name="name" type="java.lang.String" value="Spell Color 13" noResource="true"/>
                                               </Properties>
                                               <Events>
-                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor13ColorChanged"/>
+                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.gui.controls.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor13ColorChanged"/>
                                               </Events>
 
                                               <Layout>
@@ -1466,13 +1466,13 @@
                                                 </DimensionLayout>
                                               </Layout>
                                             </Container>
-                                            <Container class="com.sfc.sf2.palette.CRAMColorPicker" name="cRAMColor14">
+                                            <Container class="com.sfc.sf2.palette.gui.controls.CRAMColorPicker" name="cRAMColor14">
                                               <Properties>
                                                 <Property name="dialogTitle" type="java.lang.String" value="Spell Color 14"/>
                                                 <Property name="name" type="java.lang.String" value="Spell Color 14" noResource="true"/>
                                               </Properties>
                                               <Events>
-                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor14ColorChanged"/>
+                                                <EventHandler event="colorChanged" listener="com.sfc.sf2.palette.gui.controls.CRAMColorPicker$ColorChangedListener" parameters="java.awt.event.ActionEvent" handler="cRAMColor14ColorChanged"/>
                                               </Events>
 
                                               <Layout>

@@ -190,9 +190,9 @@ public class SpellGraphicsMainEditor extends AbstractMainEditor {
         infoButton1 = new com.sfc.sf2.core.gui.controls.InfoButton();
         jLabel4 = new javax.swing.JLabel();
         jSpinnerTilesPerRow = new javax.swing.JSpinner();
-        cRAMColor09 = new com.sfc.sf2.palette.CRAMColorPicker();
-        cRAMColor13 = new com.sfc.sf2.palette.CRAMColorPicker();
-        cRAMColor14 = new com.sfc.sf2.palette.CRAMColorPicker();
+        cRAMColor09 = new com.sfc.sf2.palette.gui.controls.CRAMColorPicker();
+        cRAMColor13 = new com.sfc.sf2.palette.gui.controls.CRAMColorPicker();
+        cRAMColor14 = new com.sfc.sf2.palette.gui.controls.CRAMColorPicker();
         jPanel6 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
@@ -925,7 +925,7 @@ public class SpellGraphicsMainEditor extends AbstractMainEditor {
         cRAMColor09.setDialogTitle("Spell Color 9");
         cRAMColor09.setName("Spell Color 9"); // NOI18N
         cRAMColor09.setPreferredSize(new java.awt.Dimension(30, 30));
-        cRAMColor09.addColorChangedListener(new com.sfc.sf2.palette.CRAMColorPicker.ColorChangedListener() {
+        cRAMColor09.addColorChangedListener(new com.sfc.sf2.palette.gui.controls.CRAMColorPicker.ColorChangedListener() {
             public void colorChanged(java.awt.event.ActionEvent evt) {
                 cRAMColor09ColorChanged(evt);
             }
@@ -945,7 +945,7 @@ public class SpellGraphicsMainEditor extends AbstractMainEditor {
         cRAMColor13.setDialogTitle("Spell Color 13");
         cRAMColor13.setName("Spell Color 13"); // NOI18N
         cRAMColor13.setPreferredSize(new java.awt.Dimension(30, 30));
-        cRAMColor13.addColorChangedListener(new com.sfc.sf2.palette.CRAMColorPicker.ColorChangedListener() {
+        cRAMColor13.addColorChangedListener(new com.sfc.sf2.palette.gui.controls.CRAMColorPicker.ColorChangedListener() {
             public void colorChanged(java.awt.event.ActionEvent evt) {
                 cRAMColor13ColorChanged(evt);
             }
@@ -965,7 +965,7 @@ public class SpellGraphicsMainEditor extends AbstractMainEditor {
         cRAMColor14.setDialogTitle("Spell Color 14");
         cRAMColor14.setName("Spell Color 14"); // NOI18N
         cRAMColor14.setPreferredSize(new java.awt.Dimension(30, 30));
-        cRAMColor14.addColorChangedListener(new com.sfc.sf2.palette.CRAMColorPicker.ColorChangedListener() {
+        cRAMColor14.addColorChangedListener(new com.sfc.sf2.palette.gui.controls.CRAMColorPicker.ColorChangedListener() {
             public void colorChanged(java.awt.event.ActionEvent evt) {
                 cRAMColor14ColorChanged(evt);
             }
@@ -1539,9 +1539,9 @@ public class SpellGraphicsMainEditor extends AbstractMainEditor {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.sfc.sf2.core.gui.controls.AccordionPanel accordionPanelEnvironment;
-    private com.sfc.sf2.palette.CRAMColorPicker cRAMColor09;
-    private com.sfc.sf2.palette.CRAMColorPicker cRAMColor13;
-    private com.sfc.sf2.palette.CRAMColorPicker cRAMColor14;
+    private com.sfc.sf2.palette.gui.controls.CRAMColorPicker cRAMColor09;
+    private com.sfc.sf2.palette.gui.controls.CRAMColorPicker cRAMColor13;
+    private com.sfc.sf2.palette.gui.controls.CRAMColorPicker cRAMColor14;
     private com.sfc.sf2.core.gui.controls.Console console1;
     private com.sfc.sf2.core.gui.controls.FileButton fileButtonExportInvocation;
     private com.sfc.sf2.core.gui.controls.FileButton fileButtonExportInvocationImage;
