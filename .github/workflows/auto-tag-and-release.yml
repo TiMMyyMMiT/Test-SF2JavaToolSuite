@@ -90,7 +90,7 @@ jobs:
           sudo mv apache-ant-1.10.14 /opt/ant
           echo "ANT_HOME=/opt/ant" >> $GITHUB_ENV
           echo "/opt/ant/bin" >> $GITHUB_PATH
-          
+      
       - name: Build projects with dependencies
         if: steps.detect_changes.outputs.should_run == 'true'
         id: build_projects
