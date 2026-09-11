@@ -82,12 +82,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Download and install Apache Ant 1.10.14
+      - name: Download and install Apache Ant 1.10.18
         if: steps.detect_changes.outputs.should_run == 'true'
         run: |
-          wget https://downloads.apache.org/ant/binaries/apache-ant-1.10.14-bin.tar.gz
-          tar -xzf apache-ant-1.10.14-bin.tar.gz
-          sudo mv apache-ant-1.10.14 /opt/ant
+          wget https://apache.org
+          tar -xzf apache-ant-1.10.18-bin.tar.gz
+          sudo mv apache-ant-1.10.18 /opt/ant
           echo "ANT_HOME=/opt/ant" >> $GITHUB_ENV
           echo "/opt/ant/bin" >> $GITHUB_PATH
           
