@@ -85,12 +85,12 @@ jobs:
       - name: Download and install Apache Ant 1.10.14
         if: steps.detect_changes.outputs.should_run == 'true'
         run: |
-          wget "https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.14-bin.tar.gz"
+          wget https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.14-bin.tar.gz
           tar -xzf apache-ant-1.10.14-bin.tar.gz
           sudo mv apache-ant-1.10.14 /opt/ant
           echo "ANT_HOME=/opt/ant" >> $GITHUB_ENV
           echo "/opt/ant/bin" >> $GITHUB_PATH
-
+          
       - name: Build projects with dependencies
         if: steps.detect_changes.outputs.should_run == 'true'
         id: build_projects
@@ -115,19 +115,20 @@ jobs:
             declare -A reference_paths
             declare -A file_references
 
- # Step 1: Load relevant keys
+            # Step 1: Load relevant keys using robust string parsing to avoid GitHub token conflicts
             while IFS='=' read -r key val; do
               key=$(echo "$key" | xargs)
               val=$(echo "$val" | xargs)
 
-              if [[ "$key" =~ ^project\.(.+)$ ]]; then
-                dep="${BASH_REMATCH[1]}"
-                project_paths["$dep"]="$val"  # Keep relative
-              elif [[ "$key" =~ ^reference\.(.+)\.jar$ ]]; then
-                reference_paths["${BASH_REMATCH[1]}"]="$val"
-              elif [[ "$key" =~ ^file\.reference\.(.+)\.jar$ ]]; then
-                jar="${BASH_REMATCH[1]}"
-                file_references["$jar"]="$val"  # Keep relative
+              if [[ "$key" == project.* ]]; then
+                dep=$(echo "$key" | sed 's/^project\.//')
+                project_paths["$dep"]="$val"
+              elif [[ "$key" == reference.*.jar ]]; then
+                ref_name=$(echo "$key" | sed -e 's/^reference\.//' -e 's/\.jar$//')
+                reference_paths["$ref_name"]="$val"
+              elif [[ "$key" == file.reference.*.jar ]]; then
+                jar=$(echo "$key" | sed -e 's/^file\.reference\.//' -e 's/\.jar$//')
+                file_references["$jar"]="$val"
               fi
             done < "$prop_file"
 
@@ -137,8 +138,9 @@ jobs:
             # Step 2: Build project dependencies
             for ref in "${!reference_paths[@]}"; do
               jar_path="${reference_paths[$ref]}"
-              if [[ "$jar_path" =~ \$\{project\.([^\}]+)\} ]]; then
-                dep_key="${BASH_REMATCH[1]}"
+              # Look for patterns like ${project.SomeDependency}
+              if echo "$jar_path" | grep -qF '${project.'; then
+                dep_key=$(echo "$jar_path" | sed -n 's/.*${project\.\([^}]*\)}.*//p')
                 dep_rel_path="${project_paths[$dep_key]}"
                 if [ -n "$dep_rel_path" ]; then
                   dep_path="$proj/$dep_rel_path"
@@ -157,20 +159,20 @@ jobs:
             # Step 3: Copy prebuilt jars
             for jar in "${!file_references[@]}"; do
               rel_path="${file_references[$jar]}"
-              rel_path="${rel_path//\//}"  # fix Windows-style slashes
+              rel_path=$(echo "$rel_path" | sed 's/\/\//g')
               jar_path="$proj/$rel_path"
               echo "Copying prebuilt jar '$jar' from $jar_path"
-                if [ -f "$jar_path" ]; then
-                  mkdir -p "$proj/lib"
-                  dest_path="$proj/lib/$(basename "$jar_path")"
-                  if [ "$jar_path" != "$dest_path" ]; then
-                    cp "$jar_path" "$dest_path"
-                  else
-                    echo "Skipping copy: source and destination are the same."
-                  fi
+              if [ -f "$jar_path" ]; then
+                mkdir -p "$proj/lib"
+                dest_path="$proj/lib/$(basename "$jar_path")"
+                if [ "$jar_path" != "$dest_path" ]; then
+                  cp "$jar_path" "$dest_path"
                 else
-                  echo "Warning: Prebuilt jar not found at $jar_path"
+                  echo "Skipping copy: source and destination are the same."
                 fi
+              else
+                echo "Warning: Prebuilt jar not found at $jar_path"
+              fi
             done
 
             # Step 4: Build the main project
