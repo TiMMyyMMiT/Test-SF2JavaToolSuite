@@ -855,7 +855,7 @@
                                               <SubComponents>
                                                 <Component class="com.sfc.sf2.core.gui.controls.DirectoryButton" name="directoryButtonExportMapDir">
                                                   <Properties>
-                                                    <Property name="directoryPath" type="java.lang.String" value=".\u005centries\u005cmap03\u005c" containsInvalidXMLChars="true"/>
+                                                    <Property name="directoryPath" type="java.lang.String" value="./entries/map03/" containsInvalidXMLChars="true"/>
                                                     <Property name="labelText" type="java.lang.String" value="Map dir :"/>
                                                     <Property name="name" type="java.lang.String" value="Export Map Directory" noResource="true"/>
                                                   </Properties>
