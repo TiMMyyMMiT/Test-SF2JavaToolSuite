@@ -213,7 +213,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
         accordionPanelEnvironment.setBorder(javax.swing.BorderFactory.createTitledBorder("Battle scene"));
 
         fileButtonBackground.setFileFormatFilter(com.sfc.sf2.core.io.FileFormat.BIN);
-        fileButtonBackground.setFilePath("../backgrounds/background09.bin");
+        fileButtonBackground.setFilePath("..\\backgrounds\\background09.bin");
         fileButtonBackground.setInfoMessage("Loads a Background, for the animation preview.");
         fileButtonBackground.setLabelText("Background :");
         fileButtonBackground.setName("Import Background"); // NOI18N
@@ -234,6 +234,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
 
         fileButtonGround.setFileFormatFilter(com.sfc.sf2.core.io.FileFormat.BIN);
         fileButtonGround.setFilePath("../grounds/groundtiles09.bin");
+        
         fileButtonGround.setInfoMessage("Loads a Ground platform, for the animation preview.");
         fileButtonGround.setLabelText("Ground :");
         fileButtonGround.setName("Import Ground"); // NOI18N
@@ -331,13 +332,13 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
 
         jLabel2.setText("Import animation disassembly.");
 
-        fileButtonBattleSprite.setFilePath("./allies/allybattlesprite00.bin");
+        fileButtonBattleSprite.setFilePath(".\\allies\\allybattlesprite00.bin");
         fileButtonBattleSprite.setInfoMessage("<html>Loads a battlesprite to animate. In general, each battesprite is matched to specific animation files (see the info button for \"Battle Sprite Animation\").</html>");
         fileButtonBattleSprite.setLabelText("Battle sprite :");
         fileButtonBattleSprite.setName("Import Battle Sprite"); // NOI18N
 
         fileButtonAnimation.setFileFormatFilter(com.sfc.sf2.core.io.FileFormat.BIN);
-        fileButtonAnimation.setFilePath("./allies/animations/allyanimation000.bin");
+        fileButtonAnimation.setFilePath(".\\allies\\animations\\allyanimation000.bin");
         fileButtonAnimation.setInfoMessage("<html>Loads the animation data. By default, ally animations 0-39 are <i>attack</> animations, 40-79 are <i>dodge</> animations, 80+ for <i>special</> animations.<br>See <b>SF2Enums</b> \"; enum AllyBattleAnimations\".<br><br>By default, enemy animations 0-59 are <i>attack</> animations, 60-117 are <i>dodge</> animations, 118+ for <i>special</> animations.<br>See <b>SF2Enums</b> \"; enum EnemyBattleAnimations\".</html>");
         fileButtonAnimation.setLabelText("Battle sprite animation :");
         fileButtonAnimation.setName("Import Animation"); // NOI18N
@@ -395,7 +396,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
         infoButton4.setText("");
 
         fileButtonExportAnimation.setFileFormatFilter(com.sfc.sf2.core.io.FileFormat.BIN);
-        fileButtonExportAnimation.setFilePath("./allies/animations/newallyanimation000.bin");
+        fileButtonExportAnimation.setFilePath(".\\allies\\animations\\newallyanimation000.bin");
         fileButtonExportAnimation.setInfoMessage("");
         fileButtonExportAnimation.setLabelText("Animation :");
         fileButtonExportAnimation.setName("Export Animation"); // NOI18N
@@ -729,7 +730,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
         );
 
         tableFrames.setBorder(javax.swing.BorderFactory.createTitledBorder("Animation frames"));
-        tableFrames.setInfoMessage("<html><b>Frame:</b> The frame number (cannot be edited).<br><b>Battlesprite: </b> The battlesprite to show during this frame.<br><b>Duration:</b> The speed of the animation. 60 = 1 second. Lower numbers animate faster.<br><b>X/Y:</b> The X and Y position offset when rendering the battle sprite.<br><b>Weapon Index:</b> The index of the weapon sprite frame to render.<br><b>H/V Flip:</b> Whether or not the weapon sprite is flipped Horizontally or Vertically.<br><b>Behnd:</b> Whether the weapon is rendered in front of or behind the batttle sprite.<br><b>Weapon X/Y:</b> The X and Y position offset when rendering the weapon.<br><br><b>Note:</b> For frame 0; Battlesprite, Duration, X, and Y cannot be edited.</html>");
+        tableFrames.setInfoMessage("<html><b>Frame:</b> The frame number (cannot be edited).<br><b>Battlesprite: </b> The battlesprite to show during this frame.<br><b>Duration:</b> The speed of the animation. 60 = 1 second. Lower numbers animate faster.<br><b>X/Y:</b> The X and Y position offset when rendering the battle sprite.<br><b>Weapon Index:</b> The index of the weapon sprite frame to render.<br><b>H/V Flip:</b> Whether or not the weapon sprite is flipped Horizontally or Vertically.<br><b>Behnd:</b> Whether the weapon is rendered in front of or behind the batttle sprite.<br><b>Weapon X/Y:</b> The X and Y position offset when rendering the weapon.<br><br><b>Note:</b><br>- For Allies: Frame 0 core data (Battlesprite, Duration, X, and Y) cannot be edited because it is stored in the BattleSprite data.<br>- For Enemies: Weapon data cannot be edited (enemy weapons are baked into sprites). Frame 0 and 1 cannot be edited because they are stored in the BattleSprite data.</html>");
         tableFrames.setModel(battleSpriteAnimationFramesModel);
         tableFrames.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tableFrames.setSingleClickText(false);
@@ -745,7 +746,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
                 .addContainerGap()
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel10Layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(tableFrames, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -759,7 +760,7 @@ public class BattleSpriteAnimationMainEditor extends AbstractMainEditor {
                     .addGroup(jPanel10Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
