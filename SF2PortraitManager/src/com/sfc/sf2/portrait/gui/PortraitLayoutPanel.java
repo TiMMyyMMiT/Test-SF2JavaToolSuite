@@ -27,7 +27,7 @@ import java.awt.event.ActionListener;
 public class PortraitLayoutPanel extends AbstractLayoutPanel {
     
     private static Color ACTIVE_UNSELECTED_COLOR = new Color(0f, 0f, 0.4f, 0.5f);
-    private static Color INACTIVE_UNSELECTED_COLOR = new Color(0f, 0f, 0.2f, 0.5f);
+    private static Color INACTIVE_UNSELECTED_COLOR = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     
     private Portrait portrait;
     
